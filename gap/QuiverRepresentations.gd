@@ -1,0 +1,4 @@
+
+
+
+DeclareOperation( "GeneratorsOfExternalHom", [ IsQuiverRepresentation, IsQuiverRepresentation ] );

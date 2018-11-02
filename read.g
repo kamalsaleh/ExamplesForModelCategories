@@ -3,4 +3,9 @@
 #
 # Reading the implementation part of the package.
 #
-ReadPackage( "ExamplesForModelCategories", "gap/ExamplesForModelCategories.gi");
+
+ReadPackage( "ExamplesForModelCategories", "gap/CotangentBeilinsonQuiver.gi" );
+ReadPackage( "ExamplesForModelCategories", "gap/GradedLeftPresentations.gi" );
+ReadPackage( "ExamplesForModelCategories", "gap/QuiverRepresentations.gi" );
+ReadPackage( "ExamplesForModelCategories", "gap/StructureBeilinsonQuiver.gi" );
+ReadPackage( "ExamplesForModelCategories", "gap/CoherentSheaves.gi" );

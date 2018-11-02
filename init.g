@@ -4,4 +4,9 @@
 # Reading the declaration part of the package.
 #
 
-ReadPackage( "ExamplesForModelCategories", "gap/ExamplesForModelCategories.gd");
+ReadPackage( "ExamplesForModelCategories", "gap/CotangentBeilinsonQuiver.gd" );
+ReadPackage( "ExamplesForModelCategories", "gap/GradedLeftPresentations.gd" );
+ReadPackage( "ExamplesForModelCategories", "gap/QuiverRepresentations.gd" );
+ReadPackage( "ExamplesForModelCategories", "gap/StructureBeilinsonQuiver.gd" );
+ReadPackage( "ExamplesForModelCategories", "gap/CoherentSheaves.gd" );
+

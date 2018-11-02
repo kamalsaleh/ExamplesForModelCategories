@@ -64,7 +64,12 @@ PackageDoc := rec(
 
 Dependencies := rec(
   GAP := ">= 4.9",
-  NeededOtherPackages := [ ],
+  NeededOtherPackages := [
+  [ "GradedModulePresentationsForCAP", ">= 0" ],
+	[ "ModelCategories", " >= 2017.07.01" ],
+	[ "QPA", ">= 2.0-dev" ],
+  [ "GradedModules", ">= 0" ]
+	],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
 ),
@@ -76,5 +81,3 @@ TestFile := "tst/testall.g",
 #Keywords := [ "TODO" ],
 
 ));
-
-
