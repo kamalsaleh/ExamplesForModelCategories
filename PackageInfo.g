@@ -65,6 +65,7 @@ PackageDoc := rec(
 Dependencies := rec(
   GAP := ">= 4.9",
   NeededOtherPackages := [
+  [ "BBGG", ">= 0" ],
   [ "GradedModulePresentationsForCAP", ">= 0" ],
 	[ "ModelCategories", " >= 2017.07.01" ],
 	[ "QPA", ">= 2.0-dev" ],
