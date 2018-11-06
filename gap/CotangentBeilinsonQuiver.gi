@@ -5,7 +5,8 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
 	function( field, n )
     local i,j,u,v,arrows,kQ,A,Q,s, vector_bundles_quiver_reps, chains_vector_bundles_quiver_reps,
     homotopy_chains_vector_bundles_quiver_reps, graded_lp_cat_sym, 
-    chains_graded_lp_cat_sym, homotopy_chains_graded_lp_cat_sym, S;
+    chains_graded_lp_cat_sym, homotopy_chains_graded_lp_cat_sym, S, ext_S, graded_lp_cat_ext, 
+	with_commutative_squares, bicomplexes_of_graded_lp_cat_sym, cochains_graded_lp_cat_sym, cochains_cochains_graded_lp_cat_sym;
 
     s := "";
     for i in [ 0 .. n ] do
@@ -85,73 +86,7 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
     S := UnderlyingHomalgGradedPolynomialRing( A );
 	graded_lp_cat_sym := GradedLeftPresentations( S : FinalizeCategory := false );
 
-    if not HasIsFinalized( graded_lp_cat_sym ) then 
-	
-	AddEvaluationMorphismWithGivenSource( graded_lp_cat_sym,
-	    function( a, b, s )
-	    local mor;
-	    mor := EvaluationMorphismWithGivenSource( UnderlyingPresentationObject( a ), UnderlyingPresentationObject( b ), UnderlyingPresentationObject( s ) );
-	    return GradedPresentationMorphism( s, UnderlyingMatrix( mor )*S, b );
-	end );
-
-	AddCoevaluationMorphismWithGivenRange( graded_lp_cat_sym,
-	    function( a, b, r )
-	    local mor;
-	    mor := CoevaluationMorphismWithGivenRange( UnderlyingPresentationObject( a ), UnderlyingPresentationObject( b ), UnderlyingPresentationObject( r ) );
-	    return GradedPresentationMorphism( a, UnderlyingMatrix( mor )*S, r );
-	end );
-
-	AddEpimorphismFromSomeProjectiveObject( graded_lp_cat_sym,
-	    function( M )
-	    local hM, U, current_degrees;
-	    hM := AsPresentationInHomalg( M );
-	    ByASmallerPresentation( hM );
-	    U := UnderlyingModule( hM );
-	    current_degrees := DegreesOfGenerators( hM );
-	    return GradedPresentationMorphism(
-	                GradedFreeLeftPresentation( Length( current_degrees), S, current_degrees ),
-	                TransitionMatrix( U, PositionOfTheDefaultPresentation(U), 1 )*S,
-	                M );
-	end, -1 );
-##
-	AddIsProjective( graded_lp_cat_sym,
-	    function( M )
-	    local l;
-	    l := Lift( IdentityMorphism( M ), EpimorphismFromSomeProjectiveObject( M ) );
-	    if l = fail then
-		return false;
-	    else
-		return true;
-	    fi;
-	end );
-
-	AddGeneratorsOfExternalHom( graded_lp_cat_sym,
-	   function( M, N )
-	    local hM, hN, G;
-	    hM := AsPresentationInHomalg( M );
-	    hN := AsPresentationInHomalg( N );
-	    G := GetGenerators( Hom( hM, hN ) );
-	    return List( G, AsPresentationMorphismInCAP );
-	end );
-    Finalize( graded_lp_cat_sym );
-
-    # constructing the chain complex category of graded left presentations over S
-    chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym : FinalizeCategory := false );
-    ModelStructureOnChainComplexes( chains_graded_lp_cat_sym );
-    AddAreLeftHomotopic( chains_graded_lp_cat_sym, 
-    	function( phi, psi )
-    	    return IsNullHomotopic( phi - psi );
-    	end );
-
-    AddGeneratorsOfExternalHom( chains_graded_lp_cat_sym,
-    GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS );
-    Finalize( chains_graded_lp_cat_sym );
-
-    homotopy_chains_graded_lp_cat_sym := HomotopyCategory( chains_graded_lp_cat_sym );
-    AddTriangulatedStructure( homotopy_chains_graded_lp_cat_sym );
-    Finalize( homotopy_chains_graded_lp_cat_sym );
-
-    fi;
+	PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
 
     return A;
 end );

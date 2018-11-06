@@ -4,8 +4,7 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 		[ IsField, IsInt ],
 	function( field, n )
 	local i,j,u,v,arrows,kQ,A,Q,s, chains_vector_bundles_quiver_reps, vector_bundles_quiver_reps, 
-	homotopy_chains_vector_bundles_quiver_reps, S, graded_lp_cat_sym, chains_graded_lp_cat_sym, 
-	homotopy_chains_graded_lp_cat_sym;
+	homotopy_chains_vector_bundles_quiver_reps, S;
 
 	s := "";
 	for i in [ 1 .. n + 1 ] do
@@ -89,6 +88,17 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	
 	S := UnderlyingHomalgGradedPolynomialRing( A );
 
+	PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
+
+return A;
+end );
+
+InstallGlobalFunction( PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING, 
+function( S )
+	local graded_lp_cat_sym, chains_graded_lp_cat_sym, 
+	homotopy_chains_graded_lp_cat_sym, ext_S, graded_lp_cat_ext, with_commutative_squares, cochains_graded_lp_cat_sym,
+	cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym;
+
 	graded_lp_cat_sym := GradedLeftPresentations( S : FinalizeCategory := false );
 
 	if not HasIsFinalized( graded_lp_cat_sym ) then 
@@ -158,8 +168,58 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	AddTriangulatedStructure( homotopy_chains_graded_lp_cat_sym );
 	Finalize( homotopy_chains_graded_lp_cat_sym );
 
+	# constructing the cochain complex category of graded left presentations over S
+	cochains_graded_lp_cat_sym := CochainComplexCategory( graded_lp_cat_sym );
+
+	# constructing the category Ch( ch( graded_lp_Cat_sym ) ) and the it associated bicomplex category
+	cochains_cochains_graded_lp_cat_sym := CochainComplexCategory( cochains_graded_lp_cat_sym );
+	with_commutative_squares := false;
+	bicomplexes_of_graded_lp_cat_sym := AsCategoryOfBicomplexes( cochains_cochains_graded_lp_cat_sym );
+	SetIsBicomplexCategoryWithCommutativeSquares( bicomplexes_of_graded_lp_cat_sym, with_commutative_squares );
+
+	# constructing the category of graded left presentations over exterior algebra A
+	
+	ext_S := KoszulDualRing( S );
+	graded_lp_cat_ext := GradedLeftPresentations( ext_S: FinalizeCategory := false );
+	SetIsFrobeniusCategory( graded_lp_cat_ext, true );
+
+	AddLiftAlongMonomorphism( graded_lp_cat_ext,
+	    function( iota, tau )
+	    local l;
+		# if not IsMonomorphism( iota ) then
+		# 	Error( "very serious error!" );
+		# fi;
+	    l := LiftAlongMonomorphism( UnderlyingPresentationMorphism( iota ),
+	            UnderlyingPresentationMorphism( tau ) );
+	    return GradedPresentationMorphism( Source( tau ), l, Source( iota ) );
+	end );
+
+	AddEpimorphismFromSomeProjectiveObject( graded_lp_cat_ext,
+	    function( M )
+	    local hM, U, current_degrees;
+	    hM := AsPresentationInHomalg( M );
+	    ByASmallerPresentation( hM );
+	    U := UnderlyingModule( hM );
+	    current_degrees := DegreesOfGenerators( hM );
+	    return GradedPresentationMorphism(
+	                GradedFreeLeftPresentation( Length( current_degrees), ext_S, current_degrees ),
+	                TransitionMatrix( U, PositionOfTheDefaultPresentation(U), 1 )*ext_S,
+	                M );
+	end, -1 );
+
+	AddGeneratorsOfExternalHom( graded_lp_cat_ext,
+	    function( M, N )
+	    return BASIS_OF_EXTERNAL_HOM_BETWEEN_GRADED_LEFT_PRES_OVER_EXTERIOR_ALGEBRA( M, N );
+	end );
+
+	ADD_METHODS_TO_GRADED_LEFT_PRESENTATIONS_OVER_EXTERIOR_ALGEBRA( graded_lp_cat_ext );
+	TurnAbelianCategoryToExactCategory( graded_lp_cat_ext );
+	
+	#SetTestFunctionForStableCategories(graded_lp_cat_ext, CanBeFactoredThroughExactProjective );
+	
+	Finalize( graded_lp_cat_ext );
+
 	fi;
-return A;
 end );
 
 InstallMethodWithCrispCache( HOMALG_GRADED_POLYNOMIAL_RING, 
