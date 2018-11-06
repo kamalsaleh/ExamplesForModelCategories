@@ -232,7 +232,7 @@ InstallMethodWithCrispCache( HOMALG_GRADED_POLYNOMIAL_RING,
 	SetWeightsOfIndeterminates( S, List( [ 1 .. n ], i -> 1 ) );
 	return S;
 end );
-	
+
 InstallMethod( UnderlyingHomalgGradedPolynomialRing,
 	[ IsQuiverAlgebra ],
 	function( A )

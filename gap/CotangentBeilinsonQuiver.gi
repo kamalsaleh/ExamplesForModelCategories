@@ -84,8 +84,7 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
 	Finalize( homotopy_chains_vector_bundles_quiver_reps );
 
     S := UnderlyingHomalgGradedPolynomialRing( A );
-	graded_lp_cat_sym := GradedLeftPresentations( S : FinalizeCategory := false );
-
+	
 	PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
 
     return A;

@@ -151,22 +151,263 @@ InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES
 end );
 
 InstallMethodWithCache( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS, 
-    [ IsBoundedChainComplex, IsBoundedChainComplex ],
-        function( C, D )
-    	local H, kernel_mor_of_H, kernel_obj_of_H, morphisms_C_to_D, 
-		morphisms_from_R_to_kernel, morphisms_from_T_to_H, T, U, cat, 
-        chains_graded_lp_cat_sym;
-        chains_graded_lp_cat_sym := CapCategory( C );
-    	cat := UnderlyingCategory( chains_graded_lp_cat_sym );
-    	U := TensorUnit( cat );
-    	H := InternalHomOnObjects( C, D );
-    	kernel_mor_of_H := CyclesAt( H, 0 );
-    	kernel_obj_of_H := Source( kernel_mor_of_H );
-    	morphisms_from_R_to_kernel := GetGenerators( Hom( AsPresentationInHomalg( U ), AsPresentationInHomalg( kernel_obj_of_H ) ) );
-    	morphisms_from_R_to_kernel := List( morphisms_from_R_to_kernel, AsPresentationMorphismInCAP );
-    	T := TensorUnit( chains_graded_lp_cat_sym );
-    	morphisms_from_T_to_H := List( morphisms_from_R_to_kernel, m -> ChainMorphism( T, H, [ PreCompose( m, kernel_mor_of_H) ], 0 ) );
-    	return List( morphisms_from_T_to_H, m-> InternalHomToTensorProductAdjunctionMap( C, D, m ) );
+        [ IsBoundedChainComplex, IsBoundedChainComplex ],
+    function( C, D )
+    local H, kernel_mor_of_H, kernel_obj_of_H, morphisms_C_to_D, 
+	morphisms_from_R_to_kernel, morphisms_from_T_to_H, T, U, cat, 
+    chains_graded_lp_cat_sym;
+    chains_graded_lp_cat_sym := CapCategory( C );
+    cat := UnderlyingCategory( chains_graded_lp_cat_sym );
+    U := TensorUnit( cat );
+    H := InternalHomOnObjects( C, D );
+    kernel_mor_of_H := CyclesAt( H, 0 );
+    kernel_obj_of_H := Source( kernel_mor_of_H );
+    morphisms_from_R_to_kernel := GetGenerators( Hom( AsPresentationInHomalg( U ), AsPresentationInHomalg( kernel_obj_of_H ) ) );
+    morphisms_from_R_to_kernel := List( morphisms_from_R_to_kernel, AsPresentationMorphismInCAP );
+    T := TensorUnit( chains_graded_lp_cat_sym );
+    morphisms_from_T_to_H := List( morphisms_from_R_to_kernel, m -> ChainMorphism( T, H, [ PreCompose( m, kernel_mor_of_H) ], 0 ) );
+    return List( morphisms_from_T_to_H, m-> InternalHomToTensorProductAdjunctionMap( C, D, m ) );
+end );
+
+InstallMethod( MORPHISM_INTO_CANONICAL_TWISTED_COTANGENT_SHEAF,
+    [ IsGradedLeftPresentation ],
+    function( some_omega )
+    local mat, S, n, L, index, G;
+
+    mat := UnderlyingMatrix( some_omega );
+    S := UnderlyingHomalgRing( some_omega );
+    n := Length( IndeterminatesOfPolynomialRing( S ) );
+
+    if NrColumns( mat ) = 1 and NrRows( mat ) = n then
+        SetMORPHISM_FROM_CANONICAL_TWISTED_COTANGENT_SHEAF( some_omega, UniversalMorphismFromZeroObject( some_omega ) );
+        return UniversalMorphismIntoZeroObject( some_omega );
+    fi;
+    
+    if NrRows( mat ) = 0 then
+        SetMORPHISM_FROM_CANONICAL_TWISTED_COTANGENT_SHEAF( some_omega, IdentityMorphism( some_omega ) );
+        return IdentityMorphism( some_omega );
+    fi;
+    
+    L := List( [ 0 .. n - 1 ], i-> [ Binomial( n, i-1 ), Binomial( n, i ) ] );
+    index := n - Position( L, [ NrRows(mat), NrColumns(mat) ] );
+    
+    if IsEqualForObjects( some_omega, TwistedCotangentSheaf( S, index ) ) then
+        G := [ IdentityMorphism( some_omega ) ];
+    else
+        G := GeneratorsOfExternalHom( some_omega, TwistedCotangentSheaf( S, index ) );
+    fi;
+
+    if Length( G ) <> 1 then
+        Error( "unexpected thing happend" );
+    fi;
+
+    SetMORPHISM_FROM_CANONICAL_TWISTED_COTANGENT_SHEAF( some_omega, Inverse( G[1] ) );
+    return G[1];
+end );
+
+
+InstallMethod( CANONICALIZE_SOME_TWISTED_COTANGENT_SHEAF, [ IsGradedLeftPresentation ],
+function( some_omega )
+local mat, S, n, L, index, K;
+
+mat := UnderlyingMatrix( some_omega );
+S := UnderlyingHomalgRing( some_omega );
+n := Length( IndeterminatesOfPolynomialRing( S ) );
+if NrColumns( mat ) = 1 and NrRows( mat ) = n then
+    ZeroObject( CapCategory( some_omega ) )!.index := -1;
+    return ZeroObject( CapCategory( some_omega ) );
+fi;
+if NrRows( mat ) = 0 then
+    some_omega!.index := n - 1;
+    return some_omega;
+fi;
+
+L := List( [ 0 .. n - 1 ], i-> [ Binomial( n, i-1 ), Binomial( n, i ) ] );
+index := n - Position( L, [ NrRows(mat), NrColumns(mat) ] );
+K := TwistedCotangentSheaf( S, index );
+K!.index := index;
+return K;
+end );
+
+InstallMethod( CANONICALIZE_SOME_TWISTED_COTANGENT_SHEAVES_MORPHISM, [ IsGradedLeftPresentationMorphism ],
+function( phi )
+# this is important in order to set needed attributes for source( phi ).
+
+MORPHISM_INTO_CANONICAL_TWISTED_COTANGENT_SHEAF( Source( phi ) );
+return PreCompose( [ 
+    MORPHISM_FROM_CANONICAL_TWISTED_COTANGENT_SHEAF( Source( phi ) ),
+    phi,
+    MORPHISM_INTO_CANONICAL_TWISTED_COTANGENT_SHEAF( Range( phi ) )
+] );
+end );
+
+DeclareAttribute( "DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES", IsGradedLeftPresentation );
+InstallMethod( DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES, [ IsGradedLeftPresentation ],
+function( M )
+local mat, S, n, L, non_zeros, length_non_zeros, degrees, current_degrees, current_mat, p, omega, N, irrelevant_module;
+
+S := UnderlyingHomalgRing( M );
+n := Length( IndeterminatesOfPolynomialRing( S ) );
+L := List( [ 0 .. n - 1 ], i-> [ Binomial( n, i-1 ), Binomial( n, i ) ] );
+mat := UnderlyingMatrix( M );
+
+if NrRows(mat) = 0 and NrColumns(mat) <> 0 then
+    return List( [ 1 .. NrColumns(mat) ], i -> GradedFreeLeftPresentation(1,S,[ GeneratorDegrees(M)[i] ] ) );
+fi;
+
+if NrRows(mat) = 0 and NrColumns(mat) = 0 then
+    return [ ZeroObject( M ) ];
+fi;
+
+non_zeros := Filtered( EntriesOfHomalgMatrix( CertainColumns( mat, [1] ) ), e -> IsZero(e)<> true );
+length_non_zeros := Length( non_zeros );
+
+if length_non_zeros = n then
+    non_zeros := HomalgMatrix( non_zeros, n, 1, S );
+    irrelevant_module := AsGradedLeftPresentation( non_zeros, GeneratorDegrees(M){[1]} );
+
+    degrees := GeneratorDegrees(M){[2..NrColumns(mat)]};
+    mat := CertainColumns( CertainRows( mat, [ n + 1 .. NrRows( mat ) ] ), [ 2 .. NrColumns( mat ) ] );
+    N := AsGradedLeftPresentation( mat, degrees );
+    return Concatenation( [ irrelevant_module ], DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( N ) );
+else
+    p := length_non_zeros + 1;
+    current_degrees := GeneratorDegrees(M){[ 1 .. L[p][2] ] };
+    current_mat := CertainColumns( CertainRows( mat, [ 1 .. L[p][1] ] ), [ 1 .. L[p][2] ] );
+    omega := AsGradedLeftPresentation( current_mat, current_degrees );
+    current_degrees := GeneratorDegrees(M){[ L[p][2]+1 .. NrColumns(mat) ] };
+    current_mat := CertainColumns( CertainRows( mat, [ L[p][1]+1 .. NrRows( mat ) ] ), [ L[p][2]+1 .. NrColumns( mat ) ] );
+    N := AsGradedLeftPresentation( current_mat, current_degrees );
+    return Concatenation( [ omega ], DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( N ) );
+fi;
+
+end );
+
+DeclareAttribute( "DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES", IsGradedLeftPresentationMorphism );
+
+InstallMethod( DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES, [ IsGradedLeftPresentationMorphism ],
+    function( phi )
+    local direct_summand_of_range, direct_summand_of_source, L;
+    direct_summand_of_source := DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( Source( phi ) );
+    direct_summand_of_range := DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( Range( phi ) );
+    L := List( [ 1 .. Length( direct_summand_of_source ) ], 
+        i -> List( [ 1 .. Length( direct_summand_of_range ) ],
+            j -> PreCompose(
+                [
+                    InjectionOfCofactorOfDirectSum(direct_summand_of_source, i),
+                    phi,
+                    ProjectionInFactorOfDirectSum(direct_summand_of_range, j )
+                ]
+            )));
+    return L;
+end );
+
+
+DeclareAttribute( "CANONICALIZE_GRADED_LEFT_PRESENTATION", IsGradedLeftPresentation );
+InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION, 
+    [ IsGradedLeftPresentation ],
+    function( M )
+    local L;
+    L := DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( M );
+    L := List( L, CANONICALIZE_SOME_TWISTED_COTANGENT_SHEAF );
+    if L = [] then
+        return ZeroObject( CapCategory( M ) );
+    fi;
+    return DirectSum( L );
+end );
+
+DeclareAttribute( "CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM", IsGradedLeftPresentationMorphism );
+InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM,
+    [ IsGradedLeftPresentationMorphism ],
+function( phi )
+local L, source, range;
+source := CANONICALIZE_GRADED_LEFT_PRESENTATION( Source( phi ) );
+range := CANONICALIZE_GRADED_LEFT_PRESENTATION( Range( phi ) );
+
+if IsZero( phi ) then 
+    return ZeroMorphism( source, range );
+fi;
+
+L := DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( phi );
+L := List( L, l -> List( l, CANONICALIZE_SOME_TWISTED_COTANGENT_SHEAVES_MORPHISM ) );
+return MorphismBetweenDirectSums( L );
+
+end );
+
+
+
+InstallMethodWithCrispCache( BeilinsonReplacement, 
+    [ IsGradedLeftPresentation ],
+    function( M )
+    local S, n, graded_lp_cat_sym, chains_graded_lp_cat_sym, cochains_graded_lp_cat_sym, cochains_cochains_graded_lp_cat_sym, 
+    bicomplexes_of_graded_lp_cat_sym, TT, LL, ChLL, Trunc_leq_m1, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor,
+    L, rep, diffs, C;
+
+    S := UnderlyingHomalgRing( M );
+    n := Length( IndeterminatesOfPolynomialRing( S ) );
+    
+	graded_lp_cat_sym := GradedLeftPresentations( S );
+	chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+	cochains_graded_lp_cat_sym := CochainComplexCategory( graded_lp_cat_sym );
+	cochains_cochains_graded_lp_cat_sym := CochainComplexCategory( cochains_graded_lp_cat_sym );
+	bicomplexes_of_graded_lp_cat_sym := AsCategoryOfBicomplexes( cochains_cochains_graded_lp_cat_sym );
+
+	TT := TateFunctor( S );
+	LL := LFunctor( S );
+	ChLL := ExtendFunctorToCochainComplexCategoryFunctor( LL );
+    Trunc_leq_m1 := BrutalTruncationAboveFunctor( cochains_graded_lp_cat_sym, -1 );;
+    ChTrunc_leq_m1 := ExtendFunctorToCochainComplexCategoryFunctor( Trunc_leq_m1 );;
+
+	ChCh_to_Bi_sym := ComplexOfComplexesToBicomplexFunctor( 
+			cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym );
+
+	Cochain_of_ver_coho_sym := ComplexOfVerticalCohomologiesFunctorAt( bicomplexes_of_graded_lp_cat_sym, -1 );
+    cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
+    L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
+    rep := ApplyFunctor( PreCompose( L ), M );
+    diffs := Differentials( rep );
+    diffs := MapLazy( diffs, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM(d), 1 );
+    C := ChainComplex( graded_lp_cat_sym, diffs );
+    SetLowerBound( C, -n );
+    SetUpperBound( C, n );
+    return C;
+end );
+
+InstallMethodWithCrispCache( BeilinsonReplacement, 
+    [ IsGradedLeftPresentationMorphism ],
+    function( phi )
+    local S, n, graded_lp_cat_sym, chains_graded_lp_cat_sym, cochains_graded_lp_cat_sym, cochains_cochains_graded_lp_cat_sym, 
+    bicomplexes_of_graded_lp_cat_sym, TT, LL, ChLL, Trunc_leq_m1, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor,
+    L, rep, morphisms, mor, source, range;
+
+    S := UnderlyingHomalgRing( phi );
+    n := Length( IndeterminatesOfPolynomialRing( S ) );
+    
+	graded_lp_cat_sym := GradedLeftPresentations( S );
+	chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+	cochains_graded_lp_cat_sym := CochainComplexCategory( graded_lp_cat_sym );
+	cochains_cochains_graded_lp_cat_sym := CochainComplexCategory( cochains_graded_lp_cat_sym );
+	bicomplexes_of_graded_lp_cat_sym := AsCategoryOfBicomplexes( cochains_cochains_graded_lp_cat_sym );
+
+	TT := TateFunctor( S );
+	LL := LFunctor( S );
+	ChLL := ExtendFunctorToCochainComplexCategoryFunctor( LL );
+    Trunc_leq_m1 := BrutalTruncationAboveFunctor( cochains_graded_lp_cat_sym, -1 );;
+    ChTrunc_leq_m1 := ExtendFunctorToCochainComplexCategoryFunctor( Trunc_leq_m1 );;
+
+	ChCh_to_Bi_sym := ComplexOfComplexesToBicomplexFunctor( 
+			cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym );
+
+	Cochain_of_ver_coho_sym := ComplexOfVerticalCohomologiesFunctorAt( bicomplexes_of_graded_lp_cat_sym, -1 );
+    cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
+    L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
+    rep := ApplyFunctor( PreCompose( L ), phi );
+    morphisms := Morphisms( rep );
+    morphisms := MapLazy( morphisms, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM(d), 1 );
+    source := BeilinsonReplacement( Source( phi ) );
+    range := BeilinsonReplacement( Range( phi ) );
+    mor := ChainMorphism( source, range, morphisms );
+    return mor;
 end );
 
 DeclareOperation( "view", [ IsGradedLeftPresentation ] );
