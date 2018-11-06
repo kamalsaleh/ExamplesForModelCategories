@@ -7,3 +7,4 @@ KeyDependentOperation( "StructureBeilinsonQuiverAlgebra", IsField, IsInt, Return
 DeclareAttribute( "UnderlyingHomalgGradedPolynomialRing", IsQuiverAlgebra );
 
 DeclareOperation( "TwistedStructureSheaf", [ IsQuiverAlgebra, IsInt, IsInt ] );
+DeclareOperation( "HOMALG_GRADED_POLYNOMIAL_RING", [ IsInt ] );
