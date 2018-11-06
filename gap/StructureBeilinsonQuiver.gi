@@ -148,7 +148,7 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	AddAreLeftHomotopic( chains_graded_lp_cat_sym, 
     	function( phi, psi )
     	    return IsNullHomotopic( phi - psi );
-end );
+        end );
 
 	AddGeneratorsOfExternalHom( chains_graded_lp_cat_sym,
 	GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS );
