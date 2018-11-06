@@ -25,8 +25,49 @@ InstallMethod( KroneckerProduct, "for two QPA matrices",
 
 end );
 
-InstallMethod( GeneratorsOfExternalHom,
-        [ IsQuiverRepresentation, IsQuiverRepresentation ],
+
+InstallGlobalFunction( LINEAR_QUIVER,
+	# IsDirection, IsObject, IsInt, IsInt
+  function( d, k, m, n )
+    local L, kL, c, l, constructor;
+    if d = RIGHT then
+      	constructor := "RightQuiver";
+    else
+        constructor := "LeftQuiver";
+    fi;
+
+    if m<=n then
+    	L := ValueGlobal(constructor)(  Concatenation( "L(v", String(m), ")[d", String(m), "]" ), n - m + 1,
+    		List( [ m .. n - 1 ], i-> [ Concatenation( "v", String(i) ), Concatenation( "v", String(i+1) ) ]  ) );
+    	kL := PathAlgebra( k, L );
+    	c := ArrowLabels( L );
+    	l := List( [ 1 .. Length( c )-1 ], i -> [ c[i], c[i+1] ] );
+	if d = RIGHT then
+    	    l := List( l, label -> PrimitivePathByLabel( L, label[1] )*PrimitivePathByLabel( L, label[2] ) );
+	else
+	    l := List( l, label -> PrimitivePathByLabel( L, label[2] )*PrimitivePathByLabel( L, label[1] ) );
+	fi;
+    	l := List( l, r -> QuiverAlgebraElement( kL, [1], [r] ) );
+    	return [ L, kL, l ];
+    else
+        L := ValueGlobal(constructor)(  Concatenation( "L(v", String(n), ")[d", String(n+1), "]" ), m - n + 1,
+	        List( [ n .. m - 1 ], i-> [ Concatenation( "v", String(i+1) ), Concatenation( "v", String(i) ) ]  ) );
+        kL := PathAlgebra( k, L );
+	c := ArrowLabels( L );
+	l := List( [ 1 .. Length( c )-1 ], i -> [ c[i+1], c[i] ] );
+	if d = RIGHT then
+	    l := List( l, label -> PrimitivePathByLabel( L, label[1] )*PrimitivePathByLabel( L, label[2] ) );
+	else
+	    l := List( l, label -> PrimitivePathByLabel( L, label[2] )*PrimitivePathByLabel( L, label[1] ) );
+	fi;
+	l := List( l, r -> QuiverAlgebraElement( kL, [1], [r] ) );
+	L!.("m") := m;
+	L!.("n") := n;
+	return [ L, kL, l ];
+    fi;
+end );
+
+InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     function( S, R )
     local A, Q, field, S_dimensions, R_dimensions, nr_cols_in_block1, nr_cols_in_block3,
     nr_cols_in_block5, nr_of_vertices, nr_of_arrows, nr_rows_of_block, mat, L, vector,
@@ -105,4 +146,266 @@ InstallMethod( GeneratorsOfExternalHom,
     od;
 
     return hom;
+end );
+
+InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,
+    function( f, g )
+    local homs_basis, Q, k, V, homs_basis_composed_with_g, L, vector, mat, sol, lift, h;
+
+    if IsZeroForObjects( Range( f ) ) then
+        return ZeroMorphism( Source( f ), Source( g ) );
+    fi;
+
+    homs_basis := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( Source( f ), Source( g ) );
+    # if homs_basis = [] then there is only the zero morphism between source(f) and source(g)
+    # Thus f must be zero in order for lift to exist.
+    if homs_basis = [ ] then
+      if IsZeroForMorphisms( f ) then
+        return ZeroMorphism( Source( f ), Source( g ) );
+      else
+        return fail;
+      fi;
+    fi;
+    Q := QuiverOfRepresentation( Source( f ) );
+    k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
+    V := Vertices( Q );
+    homs_basis_composed_with_g := List( homs_basis, m -> PreCompose( m, g ) );
+    L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
+                                        List( homs_basis_composed_with_g, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
+    L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
+
+    L := List( TransposedMat( L ), l -> StackMatricesVertically( l ) );
+    vector := StandardVector( k, ColsOfMatrix( L[ 1 ] )[ 1 ] );
+    mat := TransposedMat( StackMatricesHorizontally( List( [ 2 .. Length( L ) ], i -> L[ i ] ) ) );
+    sol := SolutionMat( mat, vector );
+
+    if sol = fail then
+        return fail;
+    else
+
+    sol := ShallowCopy( AsList( sol ) );
+
+    lift := ZeroMorphism( Source( f ), Source( g ) );
+    for h in homs_basis do
+         if not IsZero( sol[ 1 ] ) then
+             lift := lift + sol[ 1 ]*h;
+         fi;
+    Remove( sol, 1 );
+    od;
+    fi;
+    return lift;
+end );
+
+##
+InstallGlobalFunction( COMPUTE_COLIFT_IN_QUIVER_REPS,
+    function( f, g )
+    local homs_basis, Q, k, V, homs_basis_composed_with_f, L, vector, mat, sol, colift, h;
+
+    homs_basis := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( Range( f ), Range( g ) );
+    # if homs_basis = [] then there is only the zero morphism between range(f) and range(g)
+    # Thus g must be zero in order for colift to exist.
+    if homs_basis = [ ] then
+      if IsZeroForMorphisms( g ) then
+	    return ZeroMorphism( Range( f ), Range( g ) );
+      else
+	    return fail;
+      fi;
+    fi;
+    Q := QuiverOfRepresentation( Source( f ) );
+    k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
+    V := Vertices( Q );
+    homs_basis_composed_with_f := List( homs_basis, m -> PreCompose( f, m ) );
+    L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( g, v ) ) ],
+                                        List( homs_basis_composed_with_f, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+    # this line is added because I get errors when MatrixByCols recieve empty matrix
+    # it is still true since i only delete zero matrices from the equation system.
+    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
+    L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
+
+    L := List( TransposedMat( L ), l -> StackMatricesVertically( l ) );
+    vector := StandardVector( k, ColsOfMatrix( L[ 1 ] )[ 1 ] );
+    mat := TransposedMat( StackMatricesHorizontally( List( [ 2 .. Length( L ) ], i -> L[ i ] ) ) );
+    sol := SolutionMat( mat, vector );
+
+    if sol = fail then
+     return fail;
+    else
+    sol := ShallowCopy( AsList( sol ) );
+    colift := ZeroMorphism( Range( f ), Range( g ) );
+    for h in homs_basis do
+        if not IsZero( sol[ 1 ] ) then
+            colift := colift + sol[ 1 ]*h;
+        fi;
+    Remove( sol, 1 );
+    od;
+
+    fi;
+    return colift;
+end );
+
+
+InstallGlobalFunction( LINEAR_LEFT_QUIVER,
+	#[ IsObject, IsInt, IsInt ],
+  function( k, m, n )
+    return LINEAR_QUIVER( LEFT, k, m, n );
+end );
+
+InstallGlobalFunction( LINEAR_RIGHT_QUIVER,
+	#[ IsObject, IsInt, IsInt ],
+  function( k, m, n )
+    return LINEAR_QUIVER( RIGHT, k, m, n );
+end );
+
+# InstallMethod( ArrowsBetweenTwoVertices,
+# 		[ IsVertex, IsVertex ],
+#   function( v1, v2 )
+#     return Intersection( OutgoingArrows( v1 ), IncomingArrows( v2 ) );
+# end );
+
+InstallGlobalFunction( PRODUCT_OF_QUIVER_ALGEBRAS,
+    function( Aq, m, n )
+    local k, Lmn, AL;
+    k := LeftActingDomain( Aq );
+    Lmn := LINEAR_RIGHT_QUIVER( k, m, n );
+    if Lmn[3] = [ ] then
+        AL := Lmn[2];
+    else
+        AL := QuotientOfPathAlgebra( Lmn[2], Lmn[3] );
+    fi;
+    return TensorProductOfAlgebras( AL, Aq );
+end );
+
+
+
+InstallGlobalFunction( CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP,
+    function( C, A  )
+    local L, m, n, Q, dimension_vector, matrices1, matrices2, matrices;
+
+    L := QuiverOfAlgebra( TensorProductFactors( A )[1] );
+    m := ShallowCopy( Label( Vertex( L, 1 ) ) );
+    RemoveCharacters( m, "v" );
+    m := Int(m);
+    n := m + NumberOfVertices( L ) - 1;
+    if IsChainComplex( C ) then
+        Q := QuiverOfAlgebra( A );
+        dimension_vector := Concatenation( List( [ m .. n ], i-> DimensionVector( C[ i ] ) ) );
+        matrices1 := Concatenation( List( [ m .. n ], i -> MatricesOfRepresentation( C[ i ] ) ) );
+        matrices2 := Concatenation( List( [ m + 1 .. n ], i-> MatricesOfRepresentationHomomorphism( C^i ) ) );
+        matrices := Concatenation( matrices1, matrices2 );
+        return QuiverRepresentation( A, dimension_vector, Arrows( Q ), matrices );
+    else
+        Q := QuiverOfAlgebra( A );
+        dimension_vector := Concatenation( List( [ m .. n ], i-> DimensionVector( C[ i ] ) ) );
+        matrices1 := Concatenation( List( [ m .. n ], i -> MatricesOfRepresentation( C[ i ] ) ) );
+        matrices2 := Concatenation( List( [ m .. n - 1 ], i-> MatricesOfRepresentationHomomorphism( C^i ) ) );
+        matrices := Concatenation( matrices1, matrices2 );
+        return QuiverRepresentation( A, dimension_vector, Arrows( Q ), matrices );
+    fi;
+
+end );
+
+
+InstallGlobalFunction( CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM,
+    function( phi, A )
+    local L,m,n, matrices, r1, r2;
+    L := QuiverOfAlgebra( TensorProductFactors( A )[1] );
+    m := ShallowCopy( Label( Vertex( L, 1 ) ) );
+    RemoveCharacters( m, "v" );
+    m := Int(m);
+    n := m + NumberOfVertices( L ) - 1;
+    matrices := Concatenation( List( [ m .. n ], i -> MatricesOfRepresentationHomomorphism( phi[ i ] ) ) );
+    r1 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( Source( phi ), A );
+    r2 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( Range( phi ), A );
+    return QuiverRepresentationHomomorphism( r1, r2, matrices );
+end );
+
+
+InstallGlobalFunction( CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS,
+    function( C1, C2, mor, A )
+    local Q, L, q, m, n, mats;
+    # Do the compatibility stuff
+    Q := QuiverOfAlgebra( A );
+    L := QuiverOfAlgebra( TensorProductFactors( A )[1] );
+    q := QuiverOfAlgebra( TensorProductFactors( A )[2] );
+    m := ShallowCopy( Label( Vertex( L, 1 ) ) );
+    RemoveCharacters( m, "v" );
+    m := Int(m);
+    n := m + NumberOfVertices( L ) - 1;
+#     maps := MatricesOfRepresentationHomomorphism( mor );
+    mats := MatricesOfRepresentationHomomorphism( mor );
+    mats := List( [ 1 .. NumberOfVertices( L ) ],
+                i -> List( [ 1 .. NumberOfVertices( q ) ],
+                        j-> mats[ (i-1)*NumberOfVertices( q ) + j ] ) );
+    mats := List( [ m .. n ], k -> QuiverRepresentationHomomorphism( C1[k], C2[k], mats[k-m+1] ) );
+    if IsChainComplex( C1 ) then
+        return ChainMorphism( C1, C2, mats, m );
+    else
+        return CochainMorphism( C1, C2, mats, m );
+    fi;
+end );
+
+InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS,
+    function( C1, C2 )
+    local m, n, A, R1, R2, B;
+
+    m := Minimum( ActiveLowerBound( C1 ), ActiveLowerBound( C2 ) ) + 1;
+    n := Maximum( ActiveUpperBound( C1 ), ActiveUpperBound( C2 ) ) - 1;
+    if IsChainComplex( C1 ) then
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( C1[m] ), n, m );
+    else
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( C1[m] ), m, n );
+    fi;
+    R1 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( C1, A );
+    R2 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( C2, A );
+    B := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( R1, R2 );
+    return List( B, mor -> CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS( C1, C2, mor, A ) );
+end );
+
+InstallGlobalFunction( "COMPUTE_LIFTS_IN_COMPLEXES_OF_QUIVER_REPS",
+    function( f, g )
+    local m, n, A, f_, g_, lift;
+    m := Minimum( ActiveLowerBound( Source(f) ), ActiveLowerBound( Source(g) ) ) + 1;
+    n := Maximum( ActiveUpperBound( Source(f) ), ActiveUpperBound( Source(g) ) ) - 1;
+
+    if IsChainMorphism( f ) then
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( Source(f[ m ]) ), n, m );
+    else
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( Source(f[ m ]) ), m, n );
+    fi;
+
+    f_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( f, A );
+    g_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( g, A );
+
+    lift := COMPUTE_LIFT_IN_QUIVER_REPS( f_, g_ );
+
+    if lift = fail then
+        return fail;
+    else
+        return CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS( Source(f), Source( g ), lift, A );
+    fi;
+end );
+
+InstallGlobalFunction( "COMPUTE_COLIFTS_IN_COMPLEXES_OF_QUIVER_REPS",
+    function( f, g )
+    local m, n, A, f_, g_, colift;
+    m := Minimum( ActiveLowerBound( Range(f) ), ActiveLowerBound( Range(g) ) ) + 1;
+    n := Maximum( ActiveUpperBound( Range(f) ), ActiveUpperBound( Range(g) ) ) - 1;
+
+    if IsChainMorphism( f ) then
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( Source(f[ m ]) ), n, m );
+    else
+        A := PRODUCT_OF_QUIVER_ALGEBRAS( AlgebraOfRepresentation( Source(f[ m ]) ), m, n );
+    fi;
+
+    f_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( f, A );
+    g_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( g, A );
+
+    colift := COMPUTE_COLIFT_IN_QUIVER_REPS( f_, g_ );
+
+    if colift = fail then
+        return fail;
+    else
+        return CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS( Range(f), Range( g ), colift, A );
+    fi;
 end );
