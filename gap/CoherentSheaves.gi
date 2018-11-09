@@ -112,9 +112,9 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
     if i = j then
         return [ IdentityMorphism( TwistedCotangentSheaf( S, i ) ) ];
     fi;
-
-    T := TateFunctor( S );
     
+    T := TateFunctor( S );
+
     if i = j + 1 then
         omega_ii := TwistedCotangentSheaf( S, i );
         omega_jj := TwistedCotangentSheaf( S, j );
@@ -141,12 +141,12 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
         od;
         return G;
     else
-
+        
         G := Reversed( List( [ 1 .. n-1 ], k -> BasisBetweenTwistedCotangentSheaves( S, k, k - 1 ) ) );
-    index := n - i;
-    combinations := Combinations( [ 1 .. n ], i - j );
-    L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
-    return List( L, l -> PreCompose(l) );
+        index := n - i;
+        combinations := Combinations( [ 1 .. n ], i - j );
+        L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
+        return List( L, l -> PreCompose(l) );
     fi;
 end );
 

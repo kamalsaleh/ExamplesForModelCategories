@@ -82,9 +82,6 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	AddTriangulatedStructure( homotopy_chains_vector_bundles_quiver_reps );
 	Finalize( homotopy_chains_vector_bundles_quiver_reps );
 
-	# BindGlobal( "dimension_of_projective_space", n );
-	# ReadPackage( "BBGG", "examples/glp_over_g_exterior_algebra/stable_cat_of_glp_over_exterior_algebra.g" );
-	# SetUnderlyingHomalgGradedPolynomialRing( A, ValueGlobal("S") );
 	
 	S := UnderlyingHomalgGradedPolynomialRing( A );
 
@@ -97,7 +94,7 @@ InstallGlobalFunction( PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING,
 function( S )
 	local graded_lp_cat_sym, chains_graded_lp_cat_sym, 
 	homotopy_chains_graded_lp_cat_sym, ext_S, graded_lp_cat_ext, with_commutative_squares, cochains_graded_lp_cat_sym,
-	cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym;
+	cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym, stable_lp_cat_ext;
 
 	graded_lp_cat_sym := GradedLeftPresentations( S : FinalizeCategory := false );
 
@@ -186,9 +183,10 @@ function( S )
 	AddLiftAlongMonomorphism( graded_lp_cat_ext,
 	    function( iota, tau )
 	    local l;
-		# if not IsMonomorphism( iota ) then
-		# 	Error( "very serious error!" );
-		# fi;
+	    if not IsMonomorphism( iota ) then
+	        Error( "very serious error!, you think that some morphism is monomorphism, but it is not!" );
+		fi;
+
 	    l := LiftAlongMonomorphism( UnderlyingPresentationMorphism( iota ),
 	            UnderlyingPresentationMorphism( tau ) );
 	    return GradedPresentationMorphism( Source( tau ), l, Source( iota ) );
@@ -215,7 +213,7 @@ function( S )
 	ADD_METHODS_TO_GRADED_LEFT_PRESENTATIONS_OVER_EXTERIOR_ALGEBRA( graded_lp_cat_ext );
 	TurnAbelianCategoryToExactCategory( graded_lp_cat_ext );
 	
-	#SetTestFunctionForStableCategories(graded_lp_cat_ext, CanBeFactoredThroughExactProjective );
+	SetTestFunctionForStableCategories(graded_lp_cat_ext, CanBeFactoredThroughExactProjective );
 	
 	Finalize( graded_lp_cat_ext );
 
@@ -259,6 +257,7 @@ InstallMethod( UnderlyingHomalgGradedPolynomialRing,
 	n := NumberOfVertices( QuiverOfAlgebra( A ) );
 	return HOMALG_GRADED_POLYNOMIAL_RING( n );
 end );
+
 InstallMethod( UnderlyingHomalgGradedExteriorRing,
 	[ IsQuiverAlgebra ],
 	function( A )
