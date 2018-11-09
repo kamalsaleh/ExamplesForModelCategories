@@ -219,6 +219,25 @@ function( S )
 	
 	Finalize( graded_lp_cat_ext );
 
+	# constructing the stable category of graded left presentations over A and giving it the
+	# triangulated structure
+	stable_lp_cat_ext := StableCategory( graded_lp_cat_ext );
+
+	AddGeneratorsOfExternalHom( stable_lp_cat_ext,
+	    function( M, N )
+	    local basis;
+	    basis := GeneratorsOfExternalHom( UnderlyingUnstableObject(M), UnderlyingUnstableObject(N));
+	    basis := List( basis, AsStableMorphism );
+	    basis := DuplicateFreeList( Filtered( basis, b -> not IsZeroForMorphisms( b ) ) );
+	    return basis;
+	end );
+
+	SetIsTriangulatedCategory( stable_lp_cat_ext, true );
+	ADD_METHODS_TO_STABLE_CAT_OF_GRADED_LEFT_PRESENTATIONS_OVER_EXTERIOR_ALGEBRA( stable_lp_cat_ext );
+	AsTriangulatedCategory( stable_lp_cat_ext );
+	Finalize( stable_lp_cat_ext );
+
+
 	fi;
 end );
 
