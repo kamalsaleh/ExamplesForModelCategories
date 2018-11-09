@@ -1,4 +1,10 @@
 
+DeclareOperation( "ShowUnderlyingMatrix", [ IsCapCategoryCell ] );
+InstallMethod( ShowUnderlyingMatrix, [ IsCapCategoryCell ],
+ function( C )
+    Browse( EntriesOfHomalgMatrixAsListList( UnderlyingMatrix( C ) ) );
+ end );
+
 ##
 # InstallMethod( TwistFunctorOp, 
 #             [ IsHomalgGradedRing, IsInt ],
@@ -143,11 +149,47 @@ InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVE
 
 end );
 
+InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS,
+        [ IsQuiverAlgebra, IsRecord ],
+    function( A, record )
+    local cat, projectives, coefficients, u, v, source, range;
+
+    cat := CategoryOfQuiverRepresentations( A );
+    
+    u := record!.indices[ 1 ];
+    v := record!.indices[ 2 ];
+
+    if u = -1 and v = -1 then
+        return ZeroMorphism( ZeroObject( cat ), ZeroObject( cat ) );
+    elif v = -1 then
+        return UniversalMorphismIntoZeroObject( TwistedCotangentSheafAsQuiverRepresentation( A, u ) );
+    elif  u = -1 then
+        return UniversalMorphismFromZeroObject( TwistedCotangentSheafAsQuiverRepresentation( A, v ) );
+    fi;
+
+    if record!.coefficients = [] then
+        source := TwistedCotangentSheafAsQuiverRepresentation( A, u );
+        range :=  TwistedCotangentSheafAsQuiverRepresentation( A, v );
+        return ZeroMorphism( source, range );
+    else
+        coefficients := List( record!.coefficients, c -> Rat( String( c ) ) );
+        return coefficients*BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations( A, u, v );
+    fi;                     
+
+end );
+
 InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS,
         [ IsQuiverAlgebra, IsInt, IsList ],
     function( A, i, L )
     return MorphismBetweenDirectSums(
         List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS( A, i, m ) ) ) );
+end );
+
+InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS,
+        [ IsQuiverAlgebra, IsList ],
+    function( A, L )
+    return MorphismBetweenDirectSums(
+        List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, m ) ) ) );
 end );
 
 InstallMethodWithCache( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS, 
@@ -241,10 +283,9 @@ return PreCompose( [
 ] );
 end );
 
-DeclareAttribute( "DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES", IsGradedLeftPresentation );
 InstallMethod( DECOMPOSE_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES, [ IsGradedLeftPresentation ],
 function( M )
-local mat, S, n, L, non_zeros, length_non_zeros, degrees, current_degrees, current_mat, p, omega, N, irrelevant_module;
+local mat, S, n, L, non_zeros, length_non_zeros, degrees, current_degrees, current_mat, p, omega, N, irrelevant_module, T;
 
 S := UnderlyingHomalgRing( M );
 n := Length( IndeterminatesOfPolynomialRing( S ) );
@@ -283,7 +324,6 @@ fi;
 
 end );
 
-DeclareAttribute( "DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES", IsGradedLeftPresentationMorphism );
 
 InstallMethod( DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES, [ IsGradedLeftPresentationMorphism ],
     function( phi )
@@ -303,8 +343,7 @@ InstallMethod( DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGE
 end );
 
 
-DeclareAttribute( "CANONICALIZE_GRADED_LEFT_PRESENTATION", IsGradedLeftPresentation );
-InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION, 
+InstallMethod( CANONICALIZE_DIRECT_SUM_OF_NON_CANONICAL_COTANGENT_SHEAVES, 
     [ IsGradedLeftPresentation ],
     function( M )
     local L;
@@ -316,13 +355,12 @@ InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION,
     return DirectSum( L );
 end );
 
-DeclareAttribute( "CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM", IsGradedLeftPresentationMorphism );
-InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM,
+InstallMethod( CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES,
     [ IsGradedLeftPresentationMorphism ],
 function( phi )
 local L, source, range;
-source := CANONICALIZE_GRADED_LEFT_PRESENTATION( Source( phi ) );
-range := CANONICALIZE_GRADED_LEFT_PRESENTATION( Range( phi ) );
+source := CANONICALIZE_DIRECT_SUM_OF_NON_CANONICAL_COTANGENT_SHEAVES( Source( phi ) );
+range := CANONICALIZE_DIRECT_SUM_OF_NON_CANONICAL_COTANGENT_SHEAVES( Range( phi ) );
 
 if IsZero( phi ) then 
     return ZeroMorphism( source, range );
@@ -334,8 +372,7 @@ return MorphismBetweenDirectSums( L );
 
 end );
 
-
-
+##
 InstallMethodWithCrispCache( BeilinsonReplacement, 
     [ IsGradedLeftPresentation ],
     function( M )
@@ -365,14 +402,16 @@ InstallMethodWithCrispCache( BeilinsonReplacement,
     cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
     L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
     rep := ApplyFunctor( PreCompose( L ), M );
+    #return rep;
     diffs := Differentials( rep );
-    diffs := MapLazy( diffs, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM(d), 1 );
+    diffs := MapLazy( diffs, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES(d), 1 );
     C := ChainComplex( graded_lp_cat_sym, diffs );
     SetLowerBound( C, -n );
     SetUpperBound( C, n );
     return C;
 end );
 
+##
 InstallMethodWithCrispCache( BeilinsonReplacement, 
     [ IsGradedLeftPresentationMorphism ],
     function( phi )
@@ -402,14 +441,67 @@ InstallMethodWithCrispCache( BeilinsonReplacement,
     cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
     L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
     rep := ApplyFunctor( PreCompose( L ), phi );
+    # only for tests
+    #return rep;
     morphisms := Morphisms( rep );
-    morphisms := MapLazy( morphisms, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM(d), 1 );
+    morphisms := MapLazy( morphisms, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES(d), 1 );
     source := BeilinsonReplacement( Source( phi ) );
     range := BeilinsonReplacement( Range( phi ) );
     mor := ChainMorphism( source, range, morphisms );
     return mor;
 end );
 
+##
+InstallMethod( MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS, 
+    [ IsGradedLeftPresentationMorphism ],
+function( phi)
+local source, range, G, mat, n, L, i, j, zero_obj, S;
+
+source := Source( phi );
+range := Range( phi );
+
+S := UnderlyingHomalgRing( phi );
+n := Length( IndeterminatesOfPolynomialRing( S ) );
+
+L := List( [ 1 .. n ], k -> TwistedCotangentSheaf( S, k - 1 ) );
+
+zero_obj := ZeroObject( CapCategory( phi ) );
+L := Concatenation( [ zero_obj ], L );
+
+if Position( L, source ) = fail or Position( L, range ) = fail then
+    # Well here phi is supposed to be morphism between direct sum of canonical twisted cotangent sheaves
+    L := DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( phi );
+    return List( L, l -> List( l, f -> MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS( f )[1][1] ) );
+fi;
+
+i := Position( L, source )-2;
+j := Position( L, range )-2;
+
+if i = -1 or j = -1 then
+    return [ [ rec( indices := [i, j], coefficients := [] ) ] ];
+fi;
+
+if i<j then
+    return [ [ rec( indices := [i,j], coefficients := [] ) ] ];
+fi;
+
+G := ShallowCopy( BasisBetweenTwistedCotangentSheaves( S, i, j ) );
+#G := GeneratorsOfExternalHom( source, range );
+G := List( G, UnderlyingMatrix );
+G := UnionOfRows( List( G, 
+    g -> UnionOfColumns( List( [ 1 .. NrRows( g ) ], i -> CertainRows( g, [i] ) ) ) ) );
+mat := UnderlyingMatrix( phi );
+mat := UnionOfColumns( List( [ 1 .. NrRows( mat ) ], i -> CertainRows( mat, [i] ) ) );
+return [ [ rec( indices := [i,j], coefficients := EntriesOfHomalgMatrix( RightDivide( mat, G) ) ) ] ];
+end );
+
+InstallMethod( TwistedOmega,
+    [ IsExteriorRing, IsInt ],
+    function( A, i )
+    return GradedFreeLeftPresentation( 1, A, [ Length( IndeterminatesOfExteriorRing( A ) ) - i ] );
+ end );
+
+##
 DeclareOperation( "view", [ IsGradedLeftPresentation ] );
 InstallMethod( view, [ IsGradedLeftPresentation ],
 function( M )
