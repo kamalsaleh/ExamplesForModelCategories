@@ -59,7 +59,17 @@ end );
 InstallMethod( TwistedCotangentSheafOp,
     [ IsHomalgGradedRing, IsInt ],
     function( S, i )
-    return ApplyFunctor( TwistFunctor(S,i), KoszulSyzygyModule( S, i ) );
+    local n, cotangent_sheaf_as_chain;
+    n := Length( IndeterminatesOfPolynomialRing( S ) );
+    if i < 0 or i > n - 1 then
+        Error( Concatenation( "Twisted cotangent sheaves are defined only for 0,1,...,", String( n - 1 ) ) );
+    fi;
+    if i = 0 then
+        return GradedFreeLeftPresentation( 1, S, [ 0 ] );
+    else
+        cotangent_sheaf_as_chain := TwistedCotangentSheafAsChain( S, i );
+        return CokernelObject( cotangent_sheaf_as_chain^1 );
+    fi;
 end );
 
 ##
@@ -91,25 +101,53 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
         "this should return the basis of Hom( omega^i(i),omega^j(j) )",
         [ IsHomalgGradedRing, IsInt, IsInt ],
     function( S, i, j )
-    local G, n, index, combinations, L;
+    local T, omega_ii, omega_jj, L, G, K, e, current_mor, element, p, q, t, n, combinations, index;
+
+    n := Length( IndeterminatesOfPolynomialRing( S ) );
+
     if i<j then
         return [];
     fi;
 
     if i = j then
-        return [ IdentityMorphism( KoszulSyzygyModule( S, i)[i] ) ];
+        return [ IdentityMorphism( TwistedCotangentSheaf( S, i ) ) ];
     fi;
 
-    G := LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES( S );
+    T := TateFunctor( S );
     
-    n := Length( IndeterminatesOfPolynomialRing( S ) );
+    if i = j + 1 then
+        omega_ii := TwistedCotangentSheaf( S, i );
+        omega_jj := TwistedCotangentSheaf( S, j );
+        L := GeneratorsOfExternalHom( omega_ii, omega_jj );
+        G := [  ];
+        K := KoszulDualRing( S );
+        e := IndeterminatesOfExteriorRing( K );
+        for t in [ 1 .. n ] do
+            p := fail;
+            q := fail;
+            current_mor := ApplyFunctor( T, L[ t ] )[0];
+            element := MatElm( UnderlyingMatrix( current_mor ), 1, 1 );
+            p := Position( e, element );
+            q := Position( e, -element );
+            if p <> fail then
+                G[ p ] := L[ t ];
+                continue;
+            elif q <> fail then
+                G[ q ] := -L[ t ];
+                continue;
+            else
+                Error( "This should not happen!" );
+            fi;
+        od;
+        return G;
+    else
 
+        G := Reversed( List( [ 1 .. n-1 ], k -> BasisBetweenTwistedCotangentSheaves( S, k, k - 1 ) ) );
     index := n - i;
     combinations := Combinations( [ 1 .. n ], i - j );
-    combinations := List( combinations, comb -> Reversed( comb ) );
-
     L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
     return List( L, l -> PreCompose(l) );
+    fi;
 end );
 
 # only for test, don't commit this in this form
@@ -248,7 +286,6 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
     Error( "??" );
 end );
 
-DeclareOperation( "BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations", [ IsQuiverAlgebra, IsInt, IsInt ] );
 InstallMethodWithCache( BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations, 
         "this should return the basis of Hom( p_i, p_j )",
         [ IsQuiverAlgebra, IsInt, IsInt ],
@@ -280,7 +317,6 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheavesAsQuiverRepresentatio
     index := n - i;
 
     combinations := Combinations( [ 1 .. n ], i - j );
-    combinations := List( combinations, comb -> Reversed( comb ) );
     L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
     return List( L, l -> PreCompose(l) );
 end );
