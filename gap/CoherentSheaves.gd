@@ -10,5 +10,6 @@ DeclareOperation( "BasisBetweenTwistedCotangentSheaves", [ IsHomalgGradedRing, I
 
 DeclareOperation( "TwistedStructureSheafAsQuiverRepresentation", [ IsQuiverAlgebra, IsInt, IsInt ] );
 KeyDependentOperation( "TwistedCotangentSheafAsQuiverRepresentation", IsQuiverAlgebra, IsInt, ReturnTrue );
+KeyDependentOperation( "TwistedCotangentSheafAsChain", IsHomalgGradedRing, IsInt, ReturnTrue );
 
 DeclareOperation( "BasisBetweenTwistedStructureSheavesAsQuiverRepresentations", [ IsQuiverAlgebra, IsInt, IsInt, IsInt ] );

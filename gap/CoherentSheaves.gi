@@ -21,6 +21,41 @@ InstallMethod( TwistedStructureSheafOp,
     return GradedFreeLeftPresentation( 1, S, [ -i ] );
 end );
 
+InstallMethod( TwistedCotangentSheafAsChainOp,
+    [ IsHomalgGradedRing, IsInt ],
+    function( S, i )
+    local C;
+    C := Source( PositiveKoszulChainMorphism( S, i ) );
+    C := BrutalTruncationBelow( C, i );
+    return ShiftUnsignedLazy( C, i );
+end );
+
+# InstallMethod( BASIS_BETWEEN_TWISTED_COTANGENT_BUNDLES_AS_CHAINSOp,
+#     [ IsHomalgGradedRing, IsInt ],
+#     function( S, i )
+#     local n, L, K, u, v, mat, l;
+#     n := Length( IndeterminatesOfPolynomialRing( S ) );
+#     L := GeneratorsOfExternalHom( TwistedCotangentSheafAsChain(S,i), TwistedCotangentSheafAsChain(S,i-1) );
+#     K := [];
+#     for l in L do
+#         mat := EntriesOfHomalgMatrix( UnderlyingMatrix( l[ n - i - 1 ] ) );
+#         u := Position( mat, 1 );
+#         if u <> fail then
+#             K[u] := (-One(S))^(u-1)*l;
+#         fi;
+
+#         v := Position( mat, -1 );
+#         if v <> fail then
+#             K[v] := (-One(S))^v*l;
+#         fi;
+        
+#         if u = fail and v = fail then
+#             Error( "Something unexpected happend!" );
+#         fi;
+#     od;
+#     return K;
+# end );
+
 InstallMethod( TwistedCotangentSheafOp,
     [ IsHomalgGradedRing, IsInt ],
     function( S, i )
@@ -76,6 +111,48 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
     L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
     return List( L, l -> PreCompose(l) );
 end );
+
+# only for test, don't commit this in this form
+
+# BindGlobal( "BasisBetweenTwistedCotangentSheaves2",
+#     #[ IsHomalgGradedRing, IsInt, IsInt ],
+#     function( S, i, j )
+#     local basis, tau;
+#     basis := BasisBetweenTwistedCotangentSheavesAsChains( S, i, j );
+#     basis := List( basis, b -> CokernelObjectFunctorial( Source( b )^1, b[0], Range( b )^1 ) );
+# 
+#     if j <> 0 then
+#         return basis;
+#     else
+#         tau := PositiveKoszulChainMorphism( S, 0 );
+#         tau := CokernelColift( Source( tau )^1, tau[ 0 ] );
+#         return List( basis, b -> PreCompose( b, tau ) );
+#     fi;
+# end );
+
+# InstallMethodWithCache( BasisBetweenTwistedCotangentSheavesAsChains, 
+#         "this should return the basis of Hom( omega^i(i),omega^j(j) )",
+#         [ IsHomalgGradedRing, IsInt, IsInt ],
+#     function( S, i, j )
+#     local G, n, index, combinations, L;
+#     if i<j then
+#         return [];
+#     fi;
+# 
+#     if i = j then
+#         return [ IdentityMorphism( TwistedCotangentSheafAsChain( S, i ) ) ];
+#     fi;
+#     
+#     n := Length( IndeterminatesOfPolynomialRing( S ) );
+# 
+#     G := Reversed( List( [ 1 .. n-1 ], k -> BASIS_BETWEEN_TWISTED_COTANGENT_BUNDLES_AS_CHAINS( S, k ) ) );
+# 
+#     index := n - i;
+#     combinations := Combinations( [ 1 .. n ], i - j );
+#     L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
+#     return List( L, l -> PreCompose(l) );
+# end );
+
 
 ##
 InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresentations, 
