@@ -69,7 +69,8 @@ Dependencies := rec(
   [ "GradedModulePresentationsForCAP", ">= 0" ],
 	[ "ModelCategories", " >= 2017.07.01" ],
 	[ "QPA", ">= 2.0-dev" ],
-  [ "GradedModules", ">= 0" ]
+  [ "GradedModules", ">= 0" ],
+  [ "StableCategoriesForCAP", ">= 0" ],
 	],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
