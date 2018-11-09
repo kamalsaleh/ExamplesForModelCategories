@@ -240,3 +240,9 @@ InstallMethod( UnderlyingHomalgGradedPolynomialRing,
 	n := NumberOfVertices( QuiverOfAlgebra( A ) );
 	return HOMALG_GRADED_POLYNOMIAL_RING( n );
 end );
+InstallMethod( UnderlyingHomalgGradedExteriorRing,
+	[ IsQuiverAlgebra ],
+	function( A )
+    return KoszulDualRing( UnderlyingHomalgGradedPolynomialRing( A ) );
+end );
+
