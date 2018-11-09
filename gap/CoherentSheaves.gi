@@ -214,6 +214,12 @@ InstallMethod( TwistedStructureSheafAsQuiverRepresentation,
     return Source( BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, i, u, u )[ 1 ] );
 end );
 
+InstallMethod( TwistedCotangentSheafAsQuiverRepresentationOp, 
+    [ IsQuiverAlgebra, IsInt ],
+    function( A, u )
+    return Source( BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations( A, u, u )[ 1 ] );
+end );
+
 
 ##
 InstallMethod( LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES, [ IsHomalgGradedRing ],
