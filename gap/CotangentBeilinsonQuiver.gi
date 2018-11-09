@@ -86,6 +86,7 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
     S := UnderlyingHomalgGradedPolynomialRing( A );
 	
 	PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
+    #LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES( S );
 
     return A;
 end );
@@ -128,3 +129,4 @@ od;
 
 return morphisms;
 end );
+
