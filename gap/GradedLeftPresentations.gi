@@ -373,6 +373,84 @@ return MorphismBetweenDirectSums( L );
 end );
 
 ##
+#InstallMethodWithCrispCache( BeilinsonReplacement, 
+#    [ IsGradedLeftPresentation ],
+#    function( M )
+#    local S, n, graded_lp_cat_sym, chains_graded_lp_cat_sym, cochains_graded_lp_cat_sym, cochains_cochains_graded_lp_cat_sym, 
+#    bicomplexes_of_graded_lp_cat_sym, TT, LL, ChLL, Trunc_leq_m1, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor,
+#    L, rep, diffs, C;
+#
+#    S := UnderlyingHomalgRing( M );
+#    n := Length( IndeterminatesOfPolynomialRing( S ) );
+#    
+#	graded_lp_cat_sym := GradedLeftPresentations( S );
+#	chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+#	cochains_graded_lp_cat_sym := CochainComplexCategory( graded_lp_cat_sym );
+#	cochains_cochains_graded_lp_cat_sym := CochainComplexCategory( cochains_graded_lp_cat_sym );
+#	bicomplexes_of_graded_lp_cat_sym := AsCategoryOfBicomplexes( cochains_cochains_graded_lp_cat_sym );
+#
+#	TT := TateFunctor( S );
+#	LL := LFunctor( S );
+#	ChLL := ExtendFunctorToCochainComplexCategoryFunctor( LL );
+#    Trunc_leq_m1 := BrutalTruncationAboveFunctor( cochains_graded_lp_cat_sym, -1 );;
+#    ChTrunc_leq_m1 := ExtendFunctorToCochainComplexCategoryFunctor( Trunc_leq_m1 );;
+#
+#	ChCh_to_Bi_sym := ComplexOfComplexesToBicomplexFunctor( 
+#			cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym );
+#
+#	Cochain_of_ver_coho_sym := ComplexOfVerticalCohomologiesFunctorAt( bicomplexes_of_graded_lp_cat_sym, -1 );
+#    cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
+#    L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
+#    rep := ApplyFunctor( PreCompose( L ), M );
+#    #return rep;
+#    diffs := Differentials( rep );
+#    diffs := MapLazy( diffs, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES(d), 1 );
+#    C := ChainComplex( graded_lp_cat_sym, diffs );
+#    SetLowerBound( C, -n );
+#    SetUpperBound( C, n );
+#    return C;
+#end );
+
+##
+#InstallMethodWithCrispCache( BeilinsonReplacement, 
+#    [ IsGradedLeftPresentationMorphism ],
+#    function( phi )
+#    local S, n, graded_lp_cat_sym, chains_graded_lp_cat_sym, cochains_graded_lp_cat_sym, cochains_cochains_graded_lp_cat_sym, 
+#    bicomplexes_of_graded_lp_cat_sym, TT, LL, ChLL, Trunc_leq_m1, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor,
+#    L, rep, morphisms, mor, source, range;
+#
+#    S := UnderlyingHomalgRing( phi );
+#    n := Length( IndeterminatesOfPolynomialRing( S ) );
+#    
+#	graded_lp_cat_sym := GradedLeftPresentations( S );
+#	chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+#	cochains_graded_lp_cat_sym := CochainComplexCategory( graded_lp_cat_sym );
+#	cochains_cochains_graded_lp_cat_sym := CochainComplexCategory( cochains_graded_lp_cat_sym );
+#	bicomplexes_of_graded_lp_cat_sym := AsCategoryOfBicomplexes( cochains_cochains_graded_lp_cat_sym );
+#
+#	TT := TateFunctor( S );
+#	LL := LFunctor( S );
+#	ChLL := ExtendFunctorToCochainComplexCategoryFunctor( LL );
+#    Trunc_leq_m1 := BrutalTruncationAboveFunctor( cochains_graded_lp_cat_sym, -1 );;
+#    ChTrunc_leq_m1 := ExtendFunctorToCochainComplexCategoryFunctor( Trunc_leq_m1 );;
+#
+#	ChCh_to_Bi_sym := ComplexOfComplexesToBicomplexFunctor( 
+#			cochains_cochains_graded_lp_cat_sym, bicomplexes_of_graded_lp_cat_sym );
+#
+#	Cochain_of_ver_coho_sym := ComplexOfVerticalCohomologiesFunctorAt( bicomplexes_of_graded_lp_cat_sym, -1 );
+#    cochain_to_chain_functor := CochainToChainComplexFunctor( cochains_graded_lp_cat_sym, chains_graded_lp_cat_sym );
+#    L := [ TT, ChLL, ChTrunc_leq_m1, ChCh_to_Bi_sym, Cochain_of_ver_coho_sym, cochain_to_chain_functor ];
+#    rep := ApplyFunctor( PreCompose( L ), phi );
+#    # only for tests
+#    #return rep;
+#    morphisms := Morphisms( rep );
+#    morphisms := MapLazy( morphisms, d -> CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES(d), 1 );
+#    source := BeilinsonReplacement( Source( phi ) );
+#    range := BeilinsonReplacement( Range( phi ) );
+#    mor := ChainMorphism( source, range, morphisms );
+#    return mor;
+#end );
+
 InstallMethodWithCrispCache( BeilinsonReplacement, 
     [ IsGradedLeftPresentation ],
     function( M )
