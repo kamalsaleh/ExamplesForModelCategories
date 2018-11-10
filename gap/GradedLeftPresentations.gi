@@ -178,6 +178,37 @@ InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVE
 
 end );
 
+InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES,
+        [ IsHomalgGradedRing, IsRecord ],
+    function( S, record )
+    local cat, projectives, coefficients, u, v, source, range;
+
+    cat := GradedLeftPresentations( S );
+    
+    u := record!.indices[ 1 ];
+    v := record!.indices[ 2 ];
+
+    if u = -1 and v = -1 then
+        return ZeroMorphism( ZeroObject( cat ), ZeroObject( cat ) );
+    elif v = -1 then
+        return UniversalMorphismIntoZeroObject( TwistedCotangentSheaf( S, u ) );
+    elif  u = -1 then
+        return UniversalMorphismFromZeroObject( TwistedCotangentSheaf( S, v ) );
+    fi;
+
+    if record!.coefficients = [] then
+        source := TwistedCotangentSheaf( S, u );
+        range :=  TwistedCotangentSheaf( S, v );
+        return ZeroMorphism( source, range );
+    else
+        coefficients := List( record!.coefficients, c -> String( c )/S );
+        return coefficients*BasisBetweenTwistedCotangentSheaves( S, u, v );
+    fi;                     
+
+end );
+
+
+
 InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS,
         [ IsQuiverAlgebra, IsInt, IsList ],
     function( A, i, L )
@@ -191,6 +222,15 @@ InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES
     return MorphismBetweenDirectSums(
         List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, m ) ) ) );
 end );
+
+InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES,
+        [ IsHomalgGradedRing, IsList ],
+    function( S, L )
+    return MorphismBetweenDirectSums(
+        List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, m ) ) ) );
+end );
+
+
 
 InstallMethodWithCache( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS, 
         [ IsBoundedChainComplex, IsBoundedChainComplex ],
