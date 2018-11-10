@@ -573,12 +573,114 @@ mat := UnionOfColumns( List( [ 1 .. NrRows( mat ) ], i -> CertainRows( mat, [i] 
 return [ [ rec( indices := [i,j], coefficients := EntriesOfHomalgMatrix( RightDivide( mat, G) ) ) ] ];
 end );
 
-InstallMethod( TwistedOmega,
+InstallMethod( TwistedOmegaModule,
     [ IsExteriorRing, IsInt ],
     function( A, i )
     return GradedFreeLeftPresentation( 1, A, [ Length( IndeterminatesOfExteriorRing( A ) ) - i ] );
  end );
 
+InstallMethod( BasisBetweenTwistedOmegaModules,
+    [ IsExteriorRing, IsInt, IsInt ],
+    function( A, i, j )
+    local n, omega_ii, omega_jj, G, indeterminates, combinations, index, L;
+
+    indeterminates := IndeterminatesOfExteriorRing( A );
+    
+    n := Length( indeterminates );
+
+    if i<j then
+        return [  ];
+    fi;
+
+    if i = j then
+        return [ IdentityMorphism( TwistedOmegaModule( A, i ) ) ];
+    fi;
+
+    if i = j + 1 then
+        omega_ii :=TwistedOmegaModule( A, i );
+        omega_jj :=TwistedOmegaModule( A, j );
+        G := List( indeterminates, ind -> HomalgMatrix( [[ind]], 1, 1, A ) );
+        return List( G, g -> GradedPresentationMorphism( omega_ii, g, omega_jj ) );
+    else
+        
+        G := Reversed( List( [ 1 .. n-1 ], k -> BasisBetweenTwistedOmegaModules( A, k, k - 1 ) ) );
+        index := n - i;
+        combinations := Combinations( [ 1 .. n ], i - j );
+        L := List( combinations, comb -> List( [ 1 .. i - j ], k-> G[index+k-1][comb[k]] ) );
+        return List( L, l -> PreCompose(l) );
+    fi;
+
+end );
+
+InstallMethod(  MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS,
+    [ IsGradedLeftPresentationMorphism ],
+    function( phi )
+    local K, degrees_range, degrees_source, index_1, index_2, A, B, sol, n, sources, ranges, s, r, L;
+    
+    K := UnderlyingHomalgRing( phi );
+    n := Length( IndeterminatesOfExteriorRing( K ) );
+    degrees_source := GeneratorDegrees( Source( phi ) );
+    degrees_range  := GeneratorDegrees( Range( phi ) );
+
+    if NrRows( UnderlyingMatrix( Source( phi ) ) ) <> 0 or 
+        NrRows( UnderlyingMatrix( Range( phi ) ) ) <> 0 then
+            Error( "The source and range should be free modules" );
+    fi;
+
+    if Length( degrees_source ) <= 1 and Length( degrees_range ) <= 1 then
+
+        if degrees_source = [  ] and degrees_range = [  ] then
+            return [ [ rec( indices := [ -1, -1 ], coefficients := [] ) ] ];
+        elif degrees_source = [  ] and not Int( String( degrees_range[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ -1, -1  ], coefficients := [  ] ) ] ];
+        elif degrees_source = [  ] and Int( String( degrees_range[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ -1, Int( String( n - degrees_range[ 1 ]  ) ) ], coefficients := [] ) ] ];
+        elif degrees_range = [ ] and not Int( String( degrees_source[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ -1, -1 ], coefficients := [] ) ] ];
+        elif degrees_range = [ ] and Int( String( degrees_source[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ Int( String( n - degrees_source[ 1 ] ) ), -1 ], coefficients := [  ] ) ] ];
+        elif not Int( String( degrees_source[ 1 ] ) ) in [ 1 .. n ] and not Int( String( degrees_range[ 1 ] ) ) in [ 1 .. n ] then 
+            return [ [ rec( indices := [ -1, -1  ], coefficients := [  ] ) ] ];
+        elif not Int( String( degrees_source[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ -1, Int( String( n - degrees_range[ 1 ]  ) ) ], coefficients := [  ] ) ] ];
+        elif not Int( String( degrees_range[ 1 ] ) ) in [ 1 .. n ] then
+            return [ [ rec( indices := [ Int( String( n - degrees_source[ 1 ] ) ), -1 ], coefficients := [  ] ) ] ];
+        elif IsZeroForMorphisms( phi ) then
+            return [ [ rec(  indices := [ Int( String( n-degrees_source[1] ) ),
+                                        Int( String( n-degrees_range[1] ) ) ], coefficients := [  ] ) ] ];
+        else
+            index_1 := Int( String( n - degrees_source[ 1 ] ) );
+            index_2 := Int( String( n - degrees_range[ 1 ] ) );
+            B := BasisBetweenTwistedOmegaModules( K, index_1, index_2 );
+            B := List( B, UnderlyingMatrix );
+            B := UnionOfRows( B );
+            A := UnderlyingMatrix( phi );
+            sol := EntriesOfHomalgMatrix( RightDivide( A, B ) );
+            return [ [ rec( indices := [ index_1, index_2 ], coefficients := sol ) ] ];
+        fi;
+    else
+        sources := List( degrees_source, d -> GradedFreeLeftPresentation( 1, K, [ d ] ) );
+        s := Length( sources );
+        ranges  := List( degrees_range, d -> GradedFreeLeftPresentation( 1, K, [ d ] ) );
+        r := Length( ranges );
+        L := List( [ 1 .. s ], u -> 
+            List( [ 1 .. r ], v -> PreCompose(
+                [
+                    InjectionOfCofactorOfDirectSum( sources, u ),
+                    phi,
+                    ProjectionInFactorOfDirectSum( ranges, v )
+                ]
+            )));
+        L := List( L, l -> List( l, m -> MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS(m)[1][1] ) );
+        L := Filtered( L, l -> ForAll( l, r -> r.indices <> [ -1, -1 ] ) );
+        if L = [  ] then
+            return [[ rec( indices := [ -1, -1  ], coefficients := [  ] ) ]];
+        else
+            return L;
+        fi;
+    fi;
+end );
+        
 ##
 DeclareOperation( "view", [ IsGradedLeftPresentation ] );
 InstallMethod( view, [ IsGradedLeftPresentation ],

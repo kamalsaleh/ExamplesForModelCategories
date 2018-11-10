@@ -8,7 +8,7 @@ DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentationMorphism );
 
 DeclareAttribute( "MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
-
+DeclareAttribute( "MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareOperation( "RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS", [ IsQuiverAlgebra, IsInt, IsRecord ] );
 DeclareOperation( "RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS", [ IsQuiverAlgebra, IsRecord ] );
 
@@ -29,5 +29,6 @@ DeclareAttribute( "DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COT
 DeclareAttribute( "CANONICALIZE_DIRECT_SUM_OF_NON_CANONICAL_COTANGENT_SHEAVES", IsGradedLeftPresentation );
 DeclareAttribute( "CANONICALIZE_GRADED_LEFT_PRESENTATION_MORPHISM_BETWEEN_DIRECT_SUMS_OF_NON_CANONICAL_COTANGENT_SHEAVES", IsGradedLeftPresentationMorphism );
 
-DeclareOperation( "TwistedOmega", [ IsExteriorRing, IsInt ] );
+DeclareOperation( "TwistedOmegaModule", [ IsExteriorRing, IsInt ] );
+DeclareOperation( "BasisBetweenTwistedOmegaModules", [ IsExteriorRing, IsInt, IsInt ] );
 
