@@ -18,5 +18,8 @@ DeclareOperation( "BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations", 
 DeclareOperation( "BasisBetweenTwistedCotangentSheavesAsChains",
 [ IsHomalgGradedRing, IsInt, IsInt ] );
 
+DeclareAttribute( "CotangentBeilinsonFunctor", IsQuiverAlgebra );
+DeclareAttribute( "StructureBeilinsonFunctor", IsQuiverAlgebra );
+
 # KeyDependentOperation( "BASIS_BETWEEN_TWISTED_COTANGENT_BUNDLES_AS_CHAINS", IsHomalgGradedRing, IsInt, ReturnTrue );
 

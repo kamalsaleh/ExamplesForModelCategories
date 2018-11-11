@@ -371,6 +371,65 @@ od;
 return morphisms;
 end );
 
+InstallMethod( CotangentBeilinsonFunctor,
+    [ IsQuiverAlgebra ],
+    function( A )
+    local S, graded_lp_cat_sym, chains_graded_lp_cat_sym, quiver_reps, chains_quiver_reps,
+    homotopy_cat, name, F;
+    S := UnderlyingHomalgGradedPolynomialRing( A );
+    graded_lp_cat_sym := GradedLeftPresentations( S );
+    chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+    quiver_reps := CategoryOfQuiverRepresentations( A );
+    chains_quiver_reps := ChainComplexCategory( quiver_reps );
+    homotopy_cat := HomotopyCategory( chains_quiver_reps );
+    name := Concatenation( "Cotangent Beilinson functor from ", Name( chains_graded_lp_cat_sym ),
+    " to ", Name( homotopy_cat ) );
+    F := CapFunctor( name, chains_graded_lp_cat_sym, homotopy_cat );
+    AddObjectFunction( F,
+        function( C )
+        local TC, n, diff, diffs, rep, L, obj;
+        TC := TateResolution( C );
+        n := Length( IndeterminatesOfPolynomialRing( S ) );
+        diff := function(i)
+            if i> ActiveUpperBound(C)+n-1 or i<= ActiveLowerBound(C)-n+1 then
+                return ZeroObjectFunctorial( quiver_reps );
+            else
+                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
+                return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+            fi;
+            end;
+        diffs := MapLazy( IntegersList, diff, 1 );
+        rep := ChainComplex( quiver_reps, diffs );
+        SetUpperBound( rep, ActiveUpperBound(C)+n-1 );
+        SetLowerBound( rep, ActiveLowerBound(C)-n+1 );
+        obj := AsObjectInHomotopyCategory( rep );
+        SetUnderlyingReplacement( obj, rep );
+        return obj;
+    end );
+    
+    AddMorphismFunction( F,
+        function( source, phi, range )
+        local rep_source, rep_range, Tphi, mor, mors, rep, L, u, l;
+        Tphi := TateResolution( phi );
+        rep_source := UnderlyingReplacement( source );
+        rep_range :=  UnderlyingReplacement( range );
+        l := Maximum( ActiveLowerBound( rep_source ), ActiveLowerBound( rep_range ) );
+        u := Minimum( ActiveUpperBound( rep_source ), ActiveUpperBound( rep_range ) );
+        mor :=  function( i )
+            if i>=u or i<=l then
+                return ZeroMorphism( rep_source[i], rep_range[i] );
+            else
+                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[i] );
+                return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+            fi;
+            end;
+        mors := MapLazy( IntegersList, mor, 1 );
+        rep := ChainMorphism( rep_source, rep_range, mors );
+        return AsMorphismInHomotopyCategoryByReplacement( rep_source, rep, rep_range );
+        end );
+    return F;
+end );
+
 BindGlobal( "ALLOWED_INDICES_FOR_STRUCTURE_BEILINSON_ALGEBRA",
     function( A, i )
     local n,j;
