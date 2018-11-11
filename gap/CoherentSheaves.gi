@@ -112,8 +112,6 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
     if i = j then
         return [ IdentityMorphism( TwistedCotangentSheaf( S, i ) ) ];
     fi;
-    
-    T := TateFunctor( S );
 
     if i = j + 1 then
         omega_ii := TwistedCotangentSheaf( S, i );
@@ -125,7 +123,7 @@ InstallMethodWithCache( BasisBetweenTwistedCotangentSheaves,
         for t in [ 1 .. n ] do
             p := fail;
             q := fail;
-            current_mor := ApplyFunctor( T, L[ t ] )[0];
+            current_mor := TateResolution( L[ t ] )[ 0 ];
             element := MatElm( UnderlyingMatrix( current_mor ), 1, 1 );
             p := Position( e, element );
             q := Position( e, -element );
@@ -405,4 +403,3 @@ BindGlobal( "ALLOWED_INDICES_FOR_COTANGENT_BEILINSON_ALGEBRA",
     Print( s, "\n" );
 end );
 
-# 𝛀
