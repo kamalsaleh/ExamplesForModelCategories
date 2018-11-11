@@ -219,15 +219,21 @@ end );
 InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS,
         [ IsQuiverAlgebra, IsList ],
     function( A, L )
-    return MorphismBetweenDirectSums(
+    local mor;
+    mor :=  MorphismBetweenDirectSums(
         List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, m ) ) ) );
+    mor!.UNDERLYING_LIST_OF_RECORDS := L;
+    return mor;
 end );
 
 InstallMethodWithCache( LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES,
         [ IsHomalgGradedRing, IsList ],
     function( S, L )
-    return MorphismBetweenDirectSums(
+    local mor;
+    mor :=  MorphismBetweenDirectSums(
         List( L, l -> List( l, m -> RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, m ) ) ) );
+    mor!.UNDERLYING_LIST_OF_RECORDS := L;
+    return mor;
 end );
 
 
