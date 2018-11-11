@@ -1,11 +1,10 @@
-# Hello there
 # KeyDependentOperation( "TwistFunctor", IsHomalgGradedRing, IsInt, ReturnTrue );
 
 KeyDependentOperation( "PositiveKoszulChainMorphism", IsHomalgGradedRing, IsInt, ReturnTrue );
 KeyDependentOperation( "NegativeKoszulChainMorphism", IsHomalgGradedRing, IsInt, ReturnTrue );
 
-DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentation );
-DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentationMorphism );
+DeclareAttribute( "BeilinsonReplacement", IsBoundedChainComplex );
+DeclareAttribute( "BeilinsonReplacement", IsBoundedChainMorphism );
 
 DeclareAttribute( "MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );

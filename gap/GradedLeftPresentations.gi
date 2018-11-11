@@ -492,44 +492,47 @@ end );
 #end );
 
 InstallMethodWithCrispCache( BeilinsonReplacement, 
-    [ IsGradedLeftPresentation ],
-    function( M )
-    local TM, S, cat, n, diff, diffs, rep, L;
-    TM := TateResolution( M );
-    S := UnderlyingHomalgRing( M );
-    cat := CapCategory( M );
+    [ IsBoundedChainComplex ],
+    function( C )
+    local TC, S, chains, cat, n, diff, diffs, rep, L;
+    TC := TateResolution( C );
+    chains := CapCategory( C );
+    cat := UnderlyingCategory( chains );
+    S := cat!.ring_for_representation_category; 
     n := Length( IndeterminatesOfPolynomialRing( S ) );
     diff := function(i)
-            if i>n or i<=-n then
+            if i> ActiveUpperBound(C)+n-1 or i<= ActiveLowerBound(C)-n+1 then
                 return ZeroObjectFunctorial( cat );
             else
-                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TM^(-i) );
+                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
                 return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
             fi;
             end;
     diffs := MapLazy( IntegersList, diff, 1 );
     rep := ChainComplex( cat, diffs );
-    SetUpperBound( rep, n );
-    SetLowerBound( rep, -n );
+    SetUpperBound( rep, ActiveUpperBound(C)+n-1 );
+    SetLowerBound( rep, ActiveLowerBound(C)-n+1 );
     return rep;
 end );
 
 InstallMethodWithCrispCache( BeilinsonReplacement, 
-    [ IsGradedLeftPresentationMorphism ],
+    [ IsBoundedChainMorphism ],
     function( phi )
-    local Tphi, S, cat, n, mor, mors, rep, L,  source, range;
+    local Tphi, S, chains, cat, n, mor, mors, rep, L,  source, range, u, l;
     Tphi := TateResolution( phi );
-    S := UnderlyingHomalgRing( phi );
-    cat := CapCategory( phi );
+    chains := CapCategory( phi );
+    cat := UnderlyingCategory( chains );
+    S := cat!.ring_for_representation_category;
     n := Length( IndeterminatesOfPolynomialRing( S ) );
     source := BeilinsonReplacement( Source( phi ) );
     range := BeilinsonReplacement( Range( phi ) );
-
+    l := Maximum( ActiveLowerBound( source ), ActiveLowerBound( range ) );
+    u := Minimum( ActiveUpperBound( source ), ActiveUpperBound( range ) );
     mor :=  function(i)
-            if i>n or i<=-n then
-                return ZeroObjectFunctorial( cat );
+            if i>=u or i<=l then
+                return ZeroMorphism( source[i], range[i] );
             else
-                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[-i] );
+                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[i] );
                 return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
             fi;
             end;
@@ -538,6 +541,13 @@ InstallMethodWithCrispCache( BeilinsonReplacement,
     return rep;
 end );
 
+#InstallMethodWithCrispCache( BeilinsonReplacement,
+#    [ IsBoundedChainComplex ]
+#    function( C )
+#    local cochains, S,
+#    cochains := CapCategory( C );
+#
+#end );
 
 ##
 InstallMethod( MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS, 
@@ -682,7 +692,7 @@ InstallMethod(  MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS,
                 ]
             )));
         L := List( L, l -> List( l, m -> MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS(m)[1][1] ) );
-        L := Filtered( L, l -> ForAll( l, r -> r.indices <> [ -1, -1 ] ) );
+        L := Filtered( L, l -> not ForAll( l, r -> r.indices = [ -1, -1 ] ) );
         if L = [  ] then
             return [[ rec( indices := [ -1, -1  ], coefficients := [  ] ) ]];
         else
