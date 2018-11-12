@@ -69,12 +69,13 @@ InstallMethod( MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS,
     [ IsGradedLeftPresentationMorphism ],
 function( phi )
 local source, range, S, n, zero_obj, L, s, r, mat, vec, degrees_source, degrees_range, 
-list_of_ranges, list_of_sources, degree_of_source, degree_of_range;
+list_of_ranges, list_of_sources, degree_of_source, degree_of_range, cat;
 
 source := Source( phi );
 range := Range( phi );
 
 S := UnderlyingHomalgRing( phi );
+cat := GradedLeftPresentations( S );
 n := Length( IndeterminatesOfPolynomialRing( S ) );
 
 degrees_source := GeneratorDegrees( source );
@@ -85,15 +86,22 @@ r := Length( degrees_range );
 
 if s > 1 or r > 1 then
     list_of_sources := List( degrees_source, d -> GradedFreeLeftPresentation( 1, S, [ d ] ) );
+    if list_of_sources = [  ] then
+        list_of_sources := [ ZeroObject( cat ) ];
+    fi;
     list_of_ranges := List( degrees_range, d -> GradedFreeLeftPresentation( 1, S, [ d ] ) );
-    L := List( [ 1 .. s ], u -> 
-            List( [ 1 .. r ], v -> PreCompose(
+    if list_of_ranges = [  ] then
+        list_of_ranges := [ ZeroObject( cat ) ];
+    fi;
+    L := List( [ 1 .. Maximum(1,s) ], u -> 
+            List( [ 1 .. Maximum(1,r) ], v -> PreCompose(
                 [
                     InjectionOfCofactorOfDirectSum( list_of_sources, u ),
                     phi,
                     ProjectionInFactorOfDirectSum( list_of_ranges, v )
                 ]
             )));
+        #Error( "3" );
         return List( L, l -> List( l, m -> MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS(m)[1][1] ) );
 fi;
 
@@ -110,6 +118,7 @@ else
 fi;
 
 if degree_of_source < degree_of_range or IsZeroForMorphisms( phi ) then
+    #Error( "1" );
     return [ [ rec( indices := [-degree_of_source, -degree_of_range ], coefficients := [] ) ] ];
 fi;
 
@@ -117,13 +126,14 @@ mat := BasisBetweenTwistedStructureSheaves( S, -degree_of_source, -degree_of_ran
 mat := List( mat, UnderlyingMatrix );
 mat := UnionOfRows( mat );
 vec := UnderlyingMatrix( phi );
+    #Error( "2" );
 return [ [ rec( indices := [-degree_of_source, -degree_of_range], coefficients := EntriesOfHomalgMatrix( RightDivide( vec, mat ) ) ) ] ];
 end );
 
 InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS, 
         [ IsQuiverAlgebra, IsInt, IsRecord ],
     function( A, i, record )
-    local cat, projectives, coefficients, u, v, source, range;
+    local cat, projectives, coefficients, u, v, source, range, B;
 
     cat := CategoryOfQuiverRepresentations( A );
     
@@ -133,9 +143,9 @@ InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVE
     if u = infinity and v = infinity then
         return ZeroMorphism( ZeroObject( cat ), ZeroObject( cat ) );
     elif u = infinity then
-        return UniversalMorphismFromZeroObject( TwistedStructureSheafAsQuiverRepresentation( A, i, u ) );
+        return UniversalMorphismFromZeroObject( TwistedStructureSheafAsQuiverRepresentation( A, i, v ) );
     elif  v = infinity then
-        return UniversalMorphismIntoZeroObject( TwistedStructureSheafAsQuiverRepresentation( A, i, v ) );
+        return UniversalMorphismIntoZeroObject( TwistedStructureSheafAsQuiverRepresentation( A, i, u ) );
     fi;
 
     if record!.coefficients = [] then
@@ -144,10 +154,12 @@ InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVE
         return ZeroMorphism( source, range );
     else
         coefficients := List( record!.coefficients, c -> Rat( String( c ) ) );
-        return coefficients*BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, i, u, v );
+        B := BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, i, u, v );
+        return coefficients*B;
     fi;
 
 end );
+
 
 InstallMethodWithCache( RECORD_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS,
         [ IsQuiverAlgebra, IsRecord ],
