@@ -197,7 +197,7 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
     local n, projectives, twists_of_projectives, u_index, v_index, hom, current_L, current_K, p, \
     L, d, indices, S, current_mor, cokernel_proj, previous_hom, summands, current_hom, t, index; 
     
-    Print( "Computing Basis for: ", i,",", u,",", v, "\n" );
+    #Print( "Computing Basis for: ", i,",", u,",", v, "\n" );
     if i <> -1 then
         return BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, -1, u-i-1, v-i-1 );
     fi;
@@ -209,7 +209,7 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
                         return DimensionVector(a)[n]>DimensionVector(b)[n]; 
                         end );
     if u = i-1 and v = i then
-        return List( GeneratorsOfExternalHom( projectives[ 2 ], projectives[ 1 ] ), g -> StalkChainMorphism(g,0) );
+        return GeneratorsOfExternalHom( projectives[ 2 ], projectives[ 1 ] );
     fi;
 
     if u > v then
@@ -218,13 +218,12 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
 
     if ForAll( [ u, v ], j -> j in twists_of_projectives ) then
         if u = v then
-            return [ StalkChainMorphism( IdentityMorphism( projectives[ Position( twists_of_projectives, u ) ] ), 0 ) ];
+            return [ IdentityMorphism( projectives[ Position( twists_of_projectives, u ) ] ) ];
         fi;
         if v - u = 1 then
             u_index := Position( twists_of_projectives, u );
             v_index := Position( twists_of_projectives, v );
             current_hom := GeneratorsOfExternalHom( projectives[ u_index ], projectives[ v_index ] );
-            current_hom := List( current_hom, c -> StalkChainMorphism(c,0) );
             hom := [ current_hom[ 1 ] ];
             for t in [ 2 .. n ] do
                 current_L := BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, i, u + 1, v + 1 );
@@ -330,7 +329,6 @@ InstallMethod( TwistedCotangentSheafAsQuiverRepresentationOp,
     function( A, u )
     return Source( BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations( A, u, u )[ 1 ] );
 end );
-
 
 ##
 InstallMethod( LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES, [ IsHomalgGradedRing ],
