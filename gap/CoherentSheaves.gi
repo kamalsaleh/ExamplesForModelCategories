@@ -428,6 +428,67 @@ InstallMethod( CotangentBeilinsonFunctor,
     return F;
 end );
 
+InstallMethod( StructureBeilinsonFunctor,
+    [ IsQuiverAlgebra ],
+    function( A )
+    local S, graded_lp_cat_sym, chains_graded_lp_cat_sym, quiver_reps, chains_quiver_reps,
+    homotopy_cat, name, F;
+    S := UnderlyingHomalgGradedPolynomialRing( A );
+    graded_lp_cat_sym := GradedLeftPresentations( S );
+    chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
+    quiver_reps := CategoryOfQuiverRepresentations( A );
+    chains_quiver_reps := ChainComplexCategory( quiver_reps );
+    homotopy_cat := HomotopyCategory( chains_quiver_reps );
+    name := Concatenation( "Structure Beilinson functor from ", Name( chains_graded_lp_cat_sym ),
+    " to ", Name( homotopy_cat ) );
+    F := CapFunctor( name, chains_graded_lp_cat_sym, homotopy_cat );
+    AddObjectFunction( F,
+        function( C )
+        local B, diff, diffs, rep, obj;
+        B := BeilinsonReplacement( C );
+        B := CofibrantModel( B );
+        diff := function(i)
+                local L;
+            if i> ActiveUpperBound( B ) or i<= ActiveLowerBound(B) then
+                return ZeroObjectFunctorial( quiver_reps );
+            else
+                L := MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS( B^i );
+                return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS( A, 0, L );
+            fi;
+            end;
+        diffs := MapLazy( IntegersList, diff, 1 );
+        rep := ChainComplex( quiver_reps, diffs );
+        SetUpperBound( rep, ActiveUpperBound( B ) );
+        SetLowerBound( rep, ActiveLowerBound( B ) );
+        obj := AsObjectInHomotopyCategory( rep );
+        SetUnderlyingReplacement( obj, rep );
+        return obj;
+    end );
+    
+    AddMorphismFunction( F,
+        function( source, phi, range )
+        local rep_source, rep_range, mor, mors, rep, L, u, l, B;
+        B := BeilinsonReplacement( phi );
+        B := MorphismBetweenCofibrantModels( B );
+        rep_source := UnderlyingReplacement( source );
+        rep_range :=  UnderlyingReplacement( range );
+        l := Maximum( ActiveLowerBound( rep_source ), ActiveLowerBound( rep_range ) );
+        u := Minimum( ActiveUpperBound( rep_source ), ActiveUpperBound( rep_range ) );
+        mor :=  function( i )
+            if i>=u or i<=l then
+                return ZeroMorphism( rep_source[i], rep_range[i] );
+            else
+                L := MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS( B[i] );
+                return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_QUIVER_REPS( A, 0, L );
+            fi;
+            end;
+        mors := MapLazy( IntegersList, mor, 1 );
+        rep := ChainMorphism( rep_source, rep_range, mors );
+        return AsMorphismInHomotopyCategoryByReplacement( rep_source, rep, rep_range );
+        end );
+    return F;
+end );
+
 BindGlobal( "ALLOWED_INDICES_FOR_STRUCTURE_BEILINSON_ALGEBRA",
     function( A, i )
     local n,j;
