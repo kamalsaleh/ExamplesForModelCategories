@@ -509,7 +509,7 @@ end );
 #    return mor;
 #end );
 
-InstallMethodWithCrispCache( BeilinsonReplacement, 
+InstallMethod( BeilinsonReplacement, 
     [ IsBoundedChainComplex ],
     function( C )
     local TC, S, chains, cat, n, diff, diffs, rep, L;
@@ -533,7 +533,7 @@ InstallMethodWithCrispCache( BeilinsonReplacement,
     return rep;
 end );
 
-InstallMethodWithCrispCache( BeilinsonReplacement, 
+InstallMethod( BeilinsonReplacement, 
     [ IsBoundedChainMorphism ],
     function( phi )
     local Tphi, S, chains, cat, n, mor, mors, rep, L,  source, range, u, l;
@@ -718,7 +718,7 @@ InstallMethod(  MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS,
         fi;
     fi;
 end );
-        
+ 
 ##
 DeclareOperation( "view", [ IsGradedLeftPresentation ] );
 InstallMethod( view, [ IsGradedLeftPresentation ],
