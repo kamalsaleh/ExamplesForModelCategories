@@ -718,26 +718,37 @@ InstallMethod(  MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS,
         fi;
     fi;
 end );
- 
+        
 ##
-DeclareOperation( "view", [ IsGradedLeftPresentation ] );
-InstallMethod( view, [ IsGradedLeftPresentation ],
+#DeclareOperation( "View", [ IsGradedLeftPresentation ] );
+InstallMethod( ViewObj, [ IsGradedLeftPresentation ],
 function( M )
-local mat, s, i, degrees;
+local mat, s, i, degrees, n, R;
 mat := UnderlyingMatrix( M );
+R := UnderlyingHomalgRing( M );
+n := Length( Indeterminates( R ) );
 s := "";
 if NrRows( mat ) = 0 then
     degrees := GeneratorDegrees( M );
+    degrees := Collected( degrees );
     if degrees = [ ] then
         Print( "0" );
-    else
-        for i in degrees do 
-            s := Concatenation( s, "S(",String(-i),")+" );
-        od;
-        Remove( s, Length(s) );
-        Print( s );
     fi;
+        
+    if not HasIsExteriorRing( R ) then
+        for i in degrees do
+            s := Concatenation( s, "S(",String( -i[ 1 ] ),")^", String( i[ 2 ] ), " ⊕ " );
+        od;
+    else
+        for i in degrees do
+            s := Concatenation( s, "ω(", String( n - i[ 1 ] ), ")^", String( i[ 2 ] ), " ⊕ " );
+        od;
+    fi;
+    
+    s := s{ [ 1 .. Length( s ) - 5 ] };
+    Print( s );
+
 else
-    View( M );
+    TryNextMethod(  );
 fi;
 end );
