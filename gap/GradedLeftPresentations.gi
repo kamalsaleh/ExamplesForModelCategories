@@ -512,17 +512,54 @@ end );
 InstallMethod( BeilinsonReplacement, 
     [ IsBoundedChainComplex ],
     function( C )
-    local TC, S, chains, cat, n, diff, diffs, rep, L;
+    local TC, S, chains, cat, n, diff, diffs, rep, reg;
     TC := TateResolution( C );
+    reg := CastelnuovoMumfordRegularity( C );
     chains := CapCategory( C );
     cat := UnderlyingCategory( chains );
     S := cat!.ring_for_representation_category; 
     n := Length( IndeterminatesOfPolynomialRing( S ) );
     diff := function(i)
-            if i> ActiveUpperBound(C)+n-1 or i<= ActiveLowerBound(C)-n+1 then
+            local B, b, d, u, L;
+            B := BeilinsonReplacement( C );
+            
+            # very nice trick to improve speed and reduce computations
+            if i < reg then
+                b := B^( i + 1 );
+            elif i> reg then
+                b := B^( i - 1 );
+            fi;
+
+            if i> ActiveUpperBound( B ) + 1 or i<= ActiveLowerBound( B ) then
                 return ZeroObjectFunctorial( cat );
             else
-                L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
+                if i-1 in ComputedDifferentialAts( TC ) then
+                    d := GeneratorDegrees( TC[ i-1 ] );
+                    # It would be more secure to write j<1, but since the Tate res is minimal,
+                    # there is no units in differentials matrices. Hence it is ok to write i<=1
+                    # Tate is minimal because I am using homalg to compute the projective cover.
+                    if ForAll( d, j -> j <= 1 ) then
+                        u := UniversalMorphismFromZeroObject( TC[ i - 1 ] );
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( u );
+                        SetUpperBound( B, i );
+                    else
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
+                    fi;
+                
+                elif i+1 in ComputedDifferentialAts( TC ) then
+                    d := GeneratorDegrees( TC[ i ] );
+                    # Same as above
+                    if ForAll( d, j -> j >= n ) then
+                        u := UniversalMorphismIntoZeroObject( TC[ i ] );
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( u );
+                        SetLowerBound( B, i - 1 );
+                    else
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
+                    fi;
+                else    
+                    L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
+                fi;
+
                 return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
             fi;
             end;
@@ -536,7 +573,7 @@ end );
 InstallMethod( BeilinsonReplacement, 
     [ IsBoundedChainMorphism ],
     function( phi )
-    local Tphi, S, chains, cat, n, mor, mors, rep, L,  source, range, u, l;
+    local Tphi, S, chains, cat, n, mor, mors, rep, source, range;
     Tphi := TateResolution( phi );
     chains := CapCategory( phi );
     cat := UnderlyingCategory( chains );
@@ -544,11 +581,16 @@ InstallMethod( BeilinsonReplacement,
     n := Length( IndeterminatesOfPolynomialRing( S ) );
     source := BeilinsonReplacement( Source( phi ) );
     range := BeilinsonReplacement( Range( phi ) );
-    l := Maximum( ActiveLowerBound( source ), ActiveLowerBound( range ) );
-    u := Minimum( ActiveUpperBound( source ), ActiveUpperBound( range ) );
-    mor :=  function(i)
-            if i>=u or i<=l then
-                return ZeroMorphism( source[i], range[i] );
+    mor :=  function( i )
+            local a, b, l, u, L;
+            a := Source( phi )[ i ];
+            b := Range( phi )[ i ];
+
+            l := Maximum( ActiveLowerBound( source ), ActiveLowerBound( range ) );
+            u := Minimum( ActiveUpperBound( source ), ActiveUpperBound( range ) );
+            
+            if i >= u or i <= l then
+                return ZeroMorphism( a, b );
             else
                 L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[i] );
                 return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
@@ -698,8 +740,15 @@ InstallMethod(  MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS,
         fi;
     else
         sources := List( degrees_source, d -> GradedFreeLeftPresentation( 1, K, [ d ] ) );
+        if sources = [ ] then
+            sources := [ ZeroObject( phi ) ];
+        fi;
         s := Length( sources );
+        
         ranges  := List( degrees_range, d -> GradedFreeLeftPresentation( 1, K, [ d ] ) );
+        if ranges = [ ] then
+            ranges := [ ZeroObject( phi ) ];
+        fi;
         r := Length( ranges );
         L := List( [ 1 .. s ], u -> 
             List( [ 1 .. r ], v -> PreCompose(
@@ -751,4 +800,4 @@ if NrRows( mat ) = 0 then
 else
     TryNextMethod(  );
 fi;
-end );
+end ); 
