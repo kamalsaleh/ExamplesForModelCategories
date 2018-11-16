@@ -583,12 +583,12 @@ InstallMethod( BeilinsonReplacement,
     range := BeilinsonReplacement( Range( phi ) );
     mor :=  function( i )
             local a, b, l, u, L;
-            a := Source( phi )[ i ];
-            b := Range( phi )[ i ];
+            a := source[ i ];
+            b := range[ i ];
 
             l := Maximum( ActiveLowerBound( source ), ActiveLowerBound( range ) );
             u := Minimum( ActiveUpperBound( source ), ActiveUpperBound( range ) );
-            
+
             if i >= u or i <= l then
                 return ZeroMorphism( a, b );
             else
