@@ -15,10 +15,10 @@ phi := GradedPresentationMorphism( A2, mat, A5 );
 P := KernelObject( phi );
 B := BeilinsonReplacement( P );
 M := HomologyAt( B, 0 );
-# The sheafification of M is the Horrocks Muford Bundle
+# The sheafification of M is the Horrocks Mumford Bundle
 
 hM := AsPresentationInHomalg( M );
-hM := ByASmallerPresentation( hM );
+ByASmallerPresentation( hM );
 
 D := BettiDiagram( TateResolution( hM, -5, 5 ) );
 Display( D );
