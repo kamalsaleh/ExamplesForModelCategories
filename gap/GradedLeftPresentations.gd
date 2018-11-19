@@ -6,6 +6,9 @@ KeyDependentOperation( "NegativeKoszulChainMorphism", IsHomalgGradedRing, IsInt,
 DeclareAttribute( "BeilinsonReplacement", IsBoundedChainComplex );
 DeclareAttribute( "BeilinsonReplacement", IsBoundedChainMorphism );
 
+DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentation );
+DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentationMorphism );
+
 DeclareAttribute( "MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );

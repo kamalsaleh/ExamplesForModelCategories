@@ -601,13 +601,99 @@ InstallMethod( BeilinsonReplacement,
     return rep;
 end );
 
-#InstallMethodWithCrispCache( BeilinsonReplacement,
-#    [ IsBoundedChainComplex ]
-#    function( C )
-#    local cochains, S,
-#    cochains := CapCategory( C );
-#
-#end );
+InstallMethod( BeilinsonReplacement,
+    [ IsGradedLeftPresentation ],
+    function( M )
+    local R;
+    R := UnderlyingHomalgRing( M );
+    if HasIsExteriorRing( R ) and IsExteriorRing( R ) then
+        TryNextMethod(  );
+    else
+        return BeilinsonReplacement( StalkChainComplex( M, 0 ) );
+    fi;
+end );
+
+InstallMethod( BeilinsonReplacement,
+    [ IsGradedLeftPresentationMorphism ],
+    function( phi )
+    local R;
+    R := UnderlyingHomalgRing( phi );
+    if HasIsExteriorRing( R ) and IsExteriorRing( R ) then
+        TryNextMethod(  );
+    else
+        return BeilinsonReplacement( StalkChainMorphism( phi, 0 ) );
+    fi;
+end );
+
+InstallMethod( BeilinsonReplacement, 
+    [ IsGradedLeftPresentation ],
+    function( P )
+    local TP, R, S, chains, cat, n, diff, diffs, rep, reg;
+
+    R := UnderlyingHomalgRing( P );
+    if HasIsExteriorRing( R ) and IsExteriorRing( R ) then
+
+    TP := TateResolution( P );
+    reg := 0;
+    S := KoszulDualRing( R );
+
+    cat := GradedLeftPresentations( S );
+    chains := ChainComplexCategory( cat );
+    n := Length( IndeterminatesOfExteriorRing( R ) );
+    diff := function(i)
+            local B, b, d, u, L;
+            B := BeilinsonReplacement( P );
+            
+            # very nice trick to improve speed and reduce computations
+            if i < reg then
+                b := B^( i + 1 );
+            elif i> reg then
+                b := B^( i - 1 );
+            fi;
+
+            if ( HasActiveUpperBound( B ) and i> ActiveUpperBound( B ) + 1 ) or 
+                ( HasActiveLowerBound( B ) and i<= ActiveLowerBound( B ) ) then
+                return ZeroObjectFunctorial( cat );
+            else
+                if i-1 in ComputedDifferentialAts( TP ) then
+                    d := GeneratorDegrees( TP[ i-1 ] );
+                    # It would be more secure to write j<1, but since the Tate res is minimal,
+                    # there is no units in differentials matrices. Hence it is ok to write i<=1
+                    # Tate is minimal because I am using homalg to compute the projective cover.
+                    if ForAll( d, j -> j <= 1 ) then
+                        u := UniversalMorphismFromZeroObject( TP[ i - 1 ] );
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( u );
+                        SetUpperBound( B, i );
+                    else
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TP^i );
+                    fi;
+                
+                elif i+1 in ComputedDifferentialAts( TP ) then
+                    d := GeneratorDegrees( TP[ i ] );
+                    # Same as above
+                    if ForAll( d, j -> j >= n ) then
+                        u := UniversalMorphismIntoZeroObject( TP[ i ] );
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( u );
+                        SetLowerBound( B, i - 1 );
+                    else
+                        L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TP^i );
+                    fi;
+                else
+                    L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TP^i );
+                fi;
+
+                return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
+            fi;
+            end;
+    diffs := MapLazy( IntegersList, diff, 1 );
+    rep := ChainComplex( cat, diffs );
+    return rep;
+    else
+        TryNextMethod();
+    fi;
+
+end );
+
 
 ##
 InstallMethod( MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS, 
