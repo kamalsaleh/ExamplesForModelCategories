@@ -694,6 +694,49 @@ InstallMethod( BeilinsonReplacement,
 
 end );
 
+InstallMethod( BeilinsonReplacement,
+    [ IsGradedLeftPresentationMorphism ],
+    function( phi )
+    local Tphi, R, S, chains, cat, n, mor, mors, rep, source, range;
+    
+    R := UnderlyingHomalgRing( phi );
+    if HasIsExteriorRing( R ) and IsExteriorRing( R ) then
+
+        Tphi := TateResolution( phi );
+        S := KoszulDualRing( R );
+        n := Length( IndeterminatesOfPolynomialRing( S ) );
+        source := BeilinsonReplacement( Source( phi ) );
+        range := BeilinsonReplacement( Range( phi ) );
+        mor :=  function( i )
+                local a, b, l, u, L;
+                a := source[ i ];
+                b := range[ i ];
+            
+                l := -infinity;
+                u := infinity;
+
+                if HasActiveLowerBound( source ) and HasActiveLowerBound( range ) then
+                    l := Maximum( ActiveLowerBound( source ), ActiveLowerBound( range ) );
+                fi;
+            
+                if HasActiveUpperBound( source ) and HasActiveUpperBound( range ) then
+                    u := Minimum( ActiveUpperBound( source ), ActiveUpperBound( range ) );
+                fi;
+
+                if i >= u or i <= l then
+                    return ZeroMorphism( a, b );
+                else
+                   L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[i] );
+                    return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, L );
+                fi;
+                end;
+        mors := MapLazy( IntegersList, mor, 1 );
+        rep := ChainMorphism( source, range, mors );
+        return rep;
+    else
+       TryNextMethod(  ); 
+    fi;
+end );
 
 ##
 InstallMethod( MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS, 
