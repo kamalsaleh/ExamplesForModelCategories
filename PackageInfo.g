@@ -9,7 +9,7 @@
 SetPackageInfo( rec(
 
 PackageName := "ExamplesForModelCategories",
-Subtitle := "Package the provides many example of homotopy categoie Examples for Homotopy categories of Quillen Model categories and functors between them.",
+Subtitle := "Examples for Homotopy categories of Quillen Model categories and functors between them.",
 Version := "0.1",
 Date := "01/11/2018", # dd/mm/yyyy format
 
@@ -59,7 +59,7 @@ PackageDoc := rec(
   HTMLStart := "doc/chap0.html",
   PDFFile   := "doc/manual.pdf",
   SixFile   := "doc/manual.six",
-  LongTitle := "Package the provides many example of homotopy categoie Examples for Homotopy categories of Quillen Model categories and functors between them.",
+  LongTitle := "Examples for Homotopy categories of Quillen Model categories and functors between them.",
 ),
 
 Dependencies := rec(
