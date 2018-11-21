@@ -14,9 +14,10 @@ for i in [ 0 .. n ] do
         Print( "i = ", i, ", j = ", j, "\n" );
         B := BasisBetweenTwistedCotangentSheaves( S, i, j );
         for f in B do
-            Print( IsEqualForMorphisms( f, ApplyFunctor( PreCompose( [ L, Tr, H_m1 ] ), TateResolution(f)[0] ) ) );
-            Print( " & " );
-            Print( IsWellDefined( ApplyFunctor( L, TateResolution(f)[0] ) ), "\n" );
+            Print( IsEqualForMorphisms( f, ApplyFunctor( PreCompose( [ L, Tr, H_m1 ] ), TateResolution(f)[0] ) ), "\n" );
+            if not IsWellDefined( ApplyFunctor( L, TateResolution(f)[0] ) ) then
+              Error( "L is not well-defined here" );
+            fi;
         od;
         Print( "----------\n" );
     od;
