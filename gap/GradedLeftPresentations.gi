@@ -27,13 +27,13 @@ InstallMethod( ShowUnderlyingMatrix, [ IsCapCategoryCell ],
 InstallMethod( PositiveKoszulChainMorphismOp, 
     [ IsHomalgGradedRing, IsInt ],
     function( S, i )
-    local indeterminates, n, k, C, source, range, F;
-    
+    local indeterminates, n, k, C, source, range, F, L, A;
+
+    n := Length( Indeterminates( S ) );
+    A := KoszulDualRing( S );
+    L := LFunctor( S );
     if i = 0 then
-        indeterminates := Indeterminates( S );
-        n := Length( indeterminates );
-        k := AsGradedLeftPresentation( HomalgMatrix( indeterminates, n, 1, S ), [ 0 ] );
-        C := ProjectiveResolution( StalkChainComplex( k, 0 ) );
+        C := AsChainComplex( ApplyFunctor( L, TwistedOmegaModule( A, 0 ) ) );
         source := ChainComplex( List( [ 2 .. n ], i-> C^i ), 1 );
         range := StalkChainComplex( C[0], 0 );
         return ChainMorphism( source, range, [ C^1 ], 0 );
@@ -47,13 +47,14 @@ end );
 InstallMethod( NegativeKoszulChainMorphismOp, 
     [ IsHomalgGradedRing, IsInt ],
     function( S, i )
-    local indeterminates, n, k, C, source, range, F, phi;
-    
+    local indeterminates, n, k, C, source, range, F, phi, A, L;
+   
+    n := Length( Indeterminates( S ) );
+    A := KoszulDualRing( S );
+    L := LFunctor( S );
+
     if i = 0 then
-        indeterminates := Indeterminates( S );
-        n := Length( indeterminates );
-        k := AsGradedLeftPresentation( HomalgMatrix( indeterminates, n, 1, S ), [ 0 ] );
-        C := ProjectiveResolution( StalkChainComplex( k, 0 ) );
+        C := AsChainComplex( ApplyFunctor( L, TwistedOmegaModule( A, 0 ) ) );
         source := StalkChainComplex( C[ n ], 0 );
         range := ChainComplex( List( [ 1 .. n - 1 ], i-> C^i ), -n + 2 );
         phi := ChainMorphism( source, range, [ C^n ], 0 );
