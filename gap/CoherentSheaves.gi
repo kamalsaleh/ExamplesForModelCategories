@@ -64,7 +64,8 @@ InstallMethod( TwistedCotangentSheafOp,
     if i < 0 or i > n - 1 then
         Error( Concatenation( "Twisted cotangent sheaves Ω^i(i) are defined only for i = 0,1,...,", String( n - 1 ) ) );
     fi;
-    if i = 0 then
+    # NOTICE THIS
+    if i = -1 then
         return GradedFreeLeftPresentation( 1, S, [ 0 ] );
     else
         cotangent_sheaf_as_chain := TwistedCotangentSheafAsChain( S, i );
