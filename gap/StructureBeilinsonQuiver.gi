@@ -195,7 +195,7 @@ function( S )
 	AddEpimorphismFromSomeProjectiveObject( graded_lp_cat_ext,
 	    function( M )
 	    local hM, U, current_degrees;
-	    hM := AsPresentationInHomalg( M );
+        hM := AsPresentationInHomalg( M );
 	    ByASmallerPresentation( hM );
 	    U := UnderlyingModule( hM );
 	    current_degrees := DegreesOfGenerators( hM );
