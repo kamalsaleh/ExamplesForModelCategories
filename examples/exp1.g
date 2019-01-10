@@ -1,7 +1,11 @@
 LoadPackage( "ExamplesForModel" );
 
 m := InputFromUser( "Working over P^m, m := " );
-WITH_MAGMA := InputFromUser( "MAGMA? true/false " );
+
+Display( "MAGMA? y/n " );
+
+stream := InputTextUser(  );
+WITH_MAGMA := CharInt( ReadByte( stream ) );
 
 AQ := CotangentBeilinsonQuiverAlgebra( Rationals, m );
 S := UnderlyingHomalgGradedPolynomialRing( AQ );;
@@ -25,7 +29,10 @@ while IsZero( M ) do
   M := RandomObject( graded_lp_cat_sym );
 od;
 
+Print( "Random object is created!\n" );
+Print( "With regularity: " );
 reg := HomalgElementToInteger( CastelnuovoMumfordRegularity( M ) );
+Print( reg, "\n" );
 
 u := Maximum( 1,  reg + 1 );
 
@@ -35,11 +42,11 @@ v := u + Random( [ 1 .. 3 ] );
 
 Print( ", v = ", v, "\n" );
 
-m_u := MORPHISM_FROM_GLP_TO_ZEROTH_HOMOLOGY_OF_BEILINSON_REPLACEMENT(u,M);;
+m_u := MORPHISM_FROM_ZEROTH_HOMOLOGY_OF_BEILINSON_REPLACEMENT_TO_GLP( u, M );;
 
 Print( "m_u has been computed!\n" );
 
-m_v := MORPHISM_FROM_GLP_TO_ZEROTH_HOMOLOGY_OF_BEILINSON_REPLACEMENT(v,M);;
+m_v := MORPHISM_FROM_ZEROTH_HOMOLOGY_OF_BEILINSON_REPLACEMENT_TO_GLP( v, M );;
 
 Print( "m_v has been computed!\n" );
 
