@@ -246,7 +246,7 @@ InstallMethodWithCrispCache( HOMALG_GRADED_POLYNOMIAL_RING,
 	indterminates := Concatenation( List( [ 0 .. n-1 ], i -> Concatenation( ",x", String( i ) ) ) );
 	Remove( indterminates, 1 );
     
-    if IsBound( WITH_MAGMA ) and ValueGlobal( "WITH_MAGMA" ) = true then
+    if IsBound( WITH_MAGMA ) and ValueGlobal( "WITH_MAGMA" ) in [ 'y', 'Y', true ] then
         S :=  GradedRing( HomalgFieldOfRationalsInMAGMA( )*indterminates );
     else
         S :=  GradedRing( HomalgFieldOfRationalsInSingular( )*indterminates );
