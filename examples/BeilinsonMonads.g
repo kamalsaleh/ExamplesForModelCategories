@@ -11,7 +11,7 @@ graded_lp_cat_sym := GradedLeftPresentations( S );
 coh := CoherentSheavesOverProjectiveSpace( S );
 Sh := CanonicalProjection( coh );
 
-f := RandomMorphism( graded_lp_cat_sym );
+f := RandomMorphism( graded_lp_cat_sym, 3 );
 
 Tf := TateResolution( f );
 Bf := BeilinsonReplacement( f );
