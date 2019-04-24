@@ -85,8 +85,8 @@ InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     mat := MakeZeroMatrix( field, 0, S_dimensions*R_dimensions );
     nr_of_arrows := NumberOfArrows( Q );
     for i in [ 1 .. nr_of_arrows ] do
-        source_of_arrow := VertexNumber( Source( Arrow( Q, i ) ) );
-        range_of_arrow := VertexNumber( Target( Arrow( Q, i ) ) );
+        source_of_arrow := VertexIndex( Source( Arrow( Q, i ) ) );
+        range_of_arrow := VertexIndex( Target( Arrow( Q, i ) ) );
         S_i := RightMatrixOfLinearTransformation( MapForArrow( S, i ) );
         R_i := RightMatrixOfLinearTransformation( MapForArrow( R, i ) );
         id_1 := IdentityMatrix( field, DimensionsMat( S_i )[ 1 ] );
