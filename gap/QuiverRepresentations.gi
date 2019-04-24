@@ -278,6 +278,55 @@ end );
 
 
 
+# #FIXME Apply caching
+InstallGlobalFunction( PRODUCT_OF_QUIVER_REPRESENTATIONS,
+  function( omega_1, omega_2 )
+    local A1, A2, A1_A2, matrices_1, matrices_2, identity_matrices_1, identity_matrices_2, L1, L2, U, D;
+    
+    A1 := AlgebraOfRepresentation( omega_1 );
+    
+    A2 := AlgebraOfRepresentation( omega_2 );
+    
+    A1_A2 := TensorProductOfAlgebras( A1, A2 );
+    
+    matrices_1 := MatricesOfRepresentation( omega_1 );
+    
+    matrices_2 := MatricesOfRepresentation( omega_2 );
+    
+    identity_matrices_1 := List( DimensionVector( omega_1 ), d -> IdentityMatrix( Rationals, d ) );
+    
+    identity_matrices_2 := List( DimensionVector( omega_2 ), d -> IdentityMatrix( Rationals, d ) );
+    
+    L1 := ListX( identity_matrices_1, matrices_2, KroneckerProduct );
+    
+    L2 := ListX( matrices_1, identity_matrices_2, KroneckerProduct );
+    
+    U := Concatenation( L1, L2 );
+    
+    D := ListX( DimensionVector( omega_1 ), DimensionVector( omega_2 ), \* );
+    
+    return QuiverRepresentation( A1_A2, D, U );
+  
+end );
+
+InstallGlobalFunction( PRODUCT_OF_QUIVER_REPRESENTATION_HOMOMORPHISMS,
+  function( phi_1, phi_2 )
+    local matrices_1, matrices_2, L, a, b;
+    
+    matrices_1 := MatricesOfRepresentationHomomorphism( phi_1 );
+    
+    matrices_2 := MatricesOfRepresentationHomomorphism( phi_2 );
+    
+    L := ListX( matrices_1, matrices_2, KroneckerProduct );
+    
+    a := PRODUCT_OF_QUIVER_REPRESENTATIONS( Source( phi_1 ), Source( phi_2 ) );
+    
+    b := PRODUCT_OF_QUIVER_REPRESENTATIONS( Range( phi_1 ), Range( phi_2 ) );
+    
+    return QuiverRepresentationHomomorphism( a, b, L );
+    
+end );
+
 InstallGlobalFunction( CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP,
     function( C, A  )
     local L, m, n, Q, dimension_vector, matrices1, matrices2, matrices;
