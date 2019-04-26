@@ -328,6 +328,54 @@ InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     return hom;
 end );
 
+##
+InstallMethodWithCrispCache( BasisOfExternalHom,
+  [ IsQuiverRepresentation, IsQuiverRepresentation ],
+  function( a, b )
+    
+    return BasisOfHom( a, b );
+    
+end );
+
+##
+InstallMethod( CoefficientsOfLinearMorphism, # w.r.t BasisOfExternalHom
+            [ IsQuiverRepresentationHomomorphism ],
+  function( f )
+    local hom_basis, Q, k, V, L, vector, mat, sol;
+
+    hom_basis := BasisOfExternalHom( Source( f ), Range( f ) );
+    
+    if hom_basis = [ ] then
+      
+      return [ ];
+      
+    fi;
+  
+    Q := QuiverOfRepresentation( Source( f ) );
+  
+    k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
+  
+    V := Vertices( Q );
+  
+    L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
+                                      List( hom_basis, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+    
+    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
+    
+    L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
+
+    L := List( TransposedMat( L ), l -> StackMatricesVertically( l ) );
+    
+    vector := StandardVector( k, ColsOfMatrix( L[ 1 ] )[ 1 ] );
+    
+    mat := TransposedMat( StackMatricesHorizontally( List( [ 2 .. Length( L ) ], i -> L[ i ] ) ) );
+    
+    sol := SolutionMat( mat, vector );
+
+    return AsList( sol );
+  
+end );
+
 InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,
     function( f, g )
     local homs_basis, Q, k, V, homs_basis_composed_with_g, L, vector, mat, sol, lift, h;

@@ -8,6 +8,18 @@ DeclareGlobalFunction( "PRODUCT_OF_QUIVER_ALGEBRAS" );
 DeclareGlobalFunction( "PRODUCT_OF_QUIVER_REPRESENTATIONS" );
 DeclareGlobalFunction( "PRODUCT_OF_QUIVER_REPRESENTATION_HOMOMORPHISMS" );
 
+if not IsBound( BasisOfExternalHom ) then
+  
+  DeclareOperation( "BasisOfExternalHom", [ IsQuiverRepresentation, IsQuiverRepresentation ] );
+  
+fi;
+
+if not IsBound( CoefficientsOfLinearMorphism ) then
+  
+  DeclareAttribute( "CoefficientsOfLinearMorphism", IsQuiverRepresentationHomomorphism );
+  
+fi;
+ 
 DeclareGlobalFunction( "GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS" );
 DeclareGlobalFunction( "GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS" );
 
