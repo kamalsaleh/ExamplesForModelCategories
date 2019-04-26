@@ -3,8 +3,7 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 		"for gap or homalg field and an integer n",
 		[ IsField, IsInt ],
 	function( field, n )
-	local i,j,u,v,arrows,kQ,A,Q,s, chains_vector_bundles_quiver_reps, vector_bundles_quiver_reps, 
-	homotopy_chains_vector_bundles_quiver_reps, S;
+  local s, u, variable_string, Q, arrows, kQ, v, A, vector_bundles_quiver_reps, chains_vector_bundles_quiver_reps, FinalizeCategory, homotopy_chains_vector_bundles_quiver_reps, S, i, j;
 
 	s := "";
 	for i in [ 1 .. n + 1 ] do
@@ -20,11 +19,19 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	od;
 
 	u := "";
-	
+  
+  variable_string := ValueOption( "VariableString" );
+  
+  if variable_string = fail then
+    
+    variable_string := "x";
+  
+  fi;
+  
 	# Defining the string that contains the arrows of the quiver 
 	for i in [ 1 .. n ] do
 		for j in [ 0 .. n ] do
-			u := Concatenation( u,"x",String(i),String(j),":",String(i),"->",String(i+1),"," );
+			u := Concatenation( u,variable_string,String(i),String(j),":",String(i),"->",String(i+1),"," );
 		od;
 	od;
 
@@ -38,32 +45,16 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 	v := [ ];
 	for i in [ 1 .. n-1 ] do
 		for j in Combinations( [ 0 .. n ], 2 ) do
-			Add( v, kQ.(Concatenation( "x", String(i),String(j[1])) )* kQ.(Concatenation( "x", String(i+1),String(j[2]) ) )-
-		        kQ.(Concatenation( "x",String(i),String(j[2]) ) )* kQ.(Concatenation( "x", String(i+1),String(j[1]) ) ) );
+			Add( v, kQ.(Concatenation( variable_string, String(i),String(j[1])) )* kQ.(Concatenation( variable_string, String(i+1),String(j[2]) ) )-
+		        kQ.(Concatenation( variable_string,String(i),String(j[2]) ) )* kQ.(Concatenation( variable_string, String(i+1),String(j[1]) ) ) );
 		od;
 	od;
 
 	A := QuotientOfPathAlgebra( kQ, v );
 
 
-	vector_bundles_quiver_reps := CategoryOfQuiverRepresentations( A: FinalizeCategory := false );
-
-	SetIsAbelianCategoryWithEnoughProjectives( vector_bundles_quiver_reps, true );
-
-	AddEpimorphismFromSomeProjectiveObject( vector_bundles_quiver_reps, ProjectiveCover );
-
-	AddIsProjective( vector_bundles_quiver_reps, function( R )
-                        return IsIsomorphism( ProjectiveCover( R ) ) ;
-                      end );
-
-	AddLift( vector_bundles_quiver_reps, COMPUTE_LIFT_IN_QUIVER_REPS );
-
-	AddColift( vector_bundles_quiver_reps, COMPUTE_COLIFT_IN_QUIVER_REPS );
-
-	AddGeneratorsOfExternalHom( vector_bundles_quiver_reps, GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS );
-
-	Finalize( vector_bundles_quiver_reps );
-	
+	vector_bundles_quiver_reps := CategoryOfQuiverRepresentations( A );
+  
 	# ReadPackage( "ModelCategories", "examples/tools/Triangulated_Structure.g" );
 	
 	# Contructing the chains category and adding some basic opertions and the model structure to it.
