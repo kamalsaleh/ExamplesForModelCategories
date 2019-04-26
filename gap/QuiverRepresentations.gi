@@ -377,17 +377,17 @@ InstallMethod( CoefficientsOfLinearMorphism, # w.r.t BasisOfExternalHom
 end );
 
 InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,
-    function( f, g )
-    local homs_basis, Q, k, V, homs_basis_composed_with_g, L, vector, mat, sol, lift, h;
+  function( f, g )
+    local hom_basis, Q, k, V, hom_basis_composed_with_g, L, vector, mat, sol, lift, h;
 
     if IsZeroForObjects( Range( f ) ) then
         return ZeroMorphism( Source( f ), Source( g ) );
     fi;
 
-    homs_basis := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( Source( f ), Source( g ) );
-    # if homs_basis = [] then there is only the zero morphism between source(f) and source(g)
+    hom_basis := BasisOfExternalHom( Source( f ), Source( g ) );
+    # if hom_basis = [] then there is only the zero morphism between source(f) and source(g)
     # Thus f must be zero in order for lift to exist.
-    if homs_basis = [ ] then
+    if hom_basis = [ ] then
       if IsZeroForMorphisms( f ) then
         return ZeroMorphism( Source( f ), Source( g ) );
       else
@@ -397,9 +397,9 @@ InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,
     Q := QuiverOfRepresentation( Source( f ) );
     k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
     V := Vertices( Q );
-    homs_basis_composed_with_g := List( homs_basis, m -> PreCompose( m, g ) );
+    hom_basis_composed_with_g := List( hom_basis, m -> PreCompose( m, g ) );
     L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
-                                        List( homs_basis_composed_with_g, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+                                        List( hom_basis_composed_with_g, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
     L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
     L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
 
@@ -415,7 +415,7 @@ InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,
     sol := ShallowCopy( AsList( sol ) );
 
     lift := ZeroMorphism( Source( f ), Source( g ) );
-    for h in homs_basis do
+    for h in hom_basis do
          if not IsZero( sol[ 1 ] ) then
              lift := lift + sol[ 1 ]*h;
          fi;
@@ -427,13 +427,13 @@ end );
 
 ##
 InstallGlobalFunction( COMPUTE_COLIFT_IN_QUIVER_REPS,
-    function( f, g )
-    local homs_basis, Q, k, V, homs_basis_composed_with_f, L, vector, mat, sol, colift, h;
+  function( f, g )
+    local hom_basis, Q, k, V, hom_basis_composed_with_f, L, vector, mat, sol, colift, h;
 
-    homs_basis := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( Range( f ), Range( g ) );
-    # if homs_basis = [] then there is only the zero morphism between range(f) and range(g)
+    hom_basis := BasisOfExternalHom( Range( f ), Range( g ) );
+    # if hom_basis = [] then there is only the zero morphism between range(f) and range(g)
     # Thus g must be zero in order for colift to exist.
-    if homs_basis = [ ] then
+    if hom_basis = [ ] then
       if IsZeroForMorphisms( g ) then
 	    return ZeroMorphism( Range( f ), Range( g ) );
       else
@@ -443,9 +443,9 @@ InstallGlobalFunction( COMPUTE_COLIFT_IN_QUIVER_REPS,
     Q := QuiverOfRepresentation( Source( f ) );
     k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
     V := Vertices( Q );
-    homs_basis_composed_with_f := List( homs_basis, m -> PreCompose( f, m ) );
+    hom_basis_composed_with_f := List( hom_basis, m -> PreCompose( f, m ) );
     L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( g, v ) ) ],
-                                        List( homs_basis_composed_with_f, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+                                        List( hom_basis_composed_with_f, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
     # this line is added because I get errors when MatrixByCols recieve empty matrix
     # it is still true since i only delete zero matrices from the equation system.
     L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
@@ -461,7 +461,7 @@ InstallGlobalFunction( COMPUTE_COLIFT_IN_QUIVER_REPS,
     else
     sol := ShallowCopy( AsList( sol ) );
     colift := ZeroMorphism( Range( f ), Range( g ) );
-    for h in homs_basis do
+    for h in hom_basis do
         if not IsZero( sol[ 1 ] ) then
             colift := colift + sol[ 1 ]*h;
         fi;
@@ -471,7 +471,6 @@ InstallGlobalFunction( COMPUTE_COLIFT_IN_QUIVER_REPS,
     fi;
     return colift;
 end );
-
 
 InstallGlobalFunction( LINEAR_LEFT_QUIVER,
 	#[ IsObject, IsInt, IsInt ],
@@ -635,7 +634,7 @@ InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS,
     fi;
     R1 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( C1, A );
     R2 := CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP( C2, A );
-    B := GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS( R1, R2 );
+    B := BasisOfExternalHom( R1, R2 );
     return List( B, mor -> CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS( C1, C2, mor, A ) );
 end );
 
