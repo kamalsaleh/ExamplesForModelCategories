@@ -1,4 +1,115 @@
 
+##
+BindGlobal( "ADD_HOMOMORPHISM_STRUCTURE_TO_CATEGORY_OF_QUIVER_REPRESENTATIONS",
+  function( cat )
+    local field;
+    
+    field := FieldForHomomorphismStructure( cat );
+
+    SetRangeCategoryOfHomomorphismStructure( cat, MatrixCategory( field ) );
+
+    AddDistinguishedObjectOfHomomorphismStructure( cat,
+       function( )
+         
+         return VectorSpaceObject( 1, field );
+    
+    end );
+    
+    ##
+    AddHomomorphismStructureOnObjects( cat,
+      function( a, b )
+        local dimension;
+        
+        dimension := Length( BasisOfExternalHom( a, b ) );
+        
+        return VectorSpaceObject( dimension, field );
+    
+    end );
+    
+    #          alpha
+    #      a --------> a'     s = H(a',b) ---??--> r = H(a,b')
+    #      |           |
+    # alpha.h.beta     h
+    #      |           |
+    #      v           v
+    #      b' <------- b
+    #          beta
+    
+    ##
+    AddHomomorphismStructureOnMorphismsWithGivenObjects( cat,
+      function( s, alpha, beta, r )
+        local B, mat;
+        
+        B := BasisOfExternalHom( Range( alpha ), Source( beta ) );
+        
+        B := List( B, b -> PreCompose( [ alpha, b, beta ] ) );
+        
+        B := List( B, CoefficientsOfLinearMorphism );
+        
+        # Improve this
+        if Dimension( s ) * Dimension( r ) = 0 then
+          
+          mat := HomalgZeroMatrix( Dimension( s ), Dimension( r ), field );
+        
+        else
+          
+          mat := HomalgMatrix( B, Dimension( s ), Dimension( r ), field );
+        
+        fi;
+        
+        return VectorSpaceMorphism( s, mat, r );
+    
+    end );
+    
+    ##
+    AddDistinguishedObjectOfHomomorphismStructure( cat,
+      function( )
+        
+        return VectorSpaceObject( 1, field );
+    
+    end );
+    
+    ##
+    AddInterpretMorphismAsMorphismFromDinstinguishedObjectToHomomorphismStructure( cat,
+      function( alpha )
+        local coeff, D;
+        
+        coeff := CoefficientsOfLinearMorphism( alpha );
+        
+        coeff := HomalgMatrix( coeff, 1, Length( coeff ), field );
+        
+        D := VectorSpaceObject( 1, field );
+        
+        return VectorSpaceMorphism( D, coeff, VectorSpaceObject( NrCols( coeff ), field ) );
+    
+    end );
+    
+    AddInterpretMorphismFromDinstinguishedObjectToHomomorphismStructureAsMorphism( cat,
+      function( a, b, iota )
+        local mat, coeff, B, L;
+        
+        mat := UnderlyingMatrix( iota );
+        
+        coeff := EntriesOfHomalgMatrix( mat );
+        
+        B := BasisOfExternalHom( a, b );
+        
+        L := List( [ 1 .. Length( coeff ) ], i -> MultiplyWithElementInFieldForHomomorphismStructure( coeff[ i ], B[ i ] ) );
+        
+        if L = [  ] then
+          
+          return ZeroMorphism( a, b );
+        
+        else
+          
+          return Sum( L );
+        
+        fi;
+    
+    end );
+
+end );
+
 InstallMethod( CategoryOfQuiverRepresentations,
               [ IsQuiverAlgebra and IsRightQuiverAlgebra ],
               1000,
@@ -17,6 +128,16 @@ InstallMethod( CategoryOfQuiverRepresentations,
     
     domain := LeftActingDomain( A );
     
+    if domain = Rationals then
+      
+      SetFieldForHomomorphismStructure( cat, HomalgFieldOfRationals( ) );
+      
+    elif IsFieldForHomalg( domain ) then
+    
+      SetFieldForHomomorphismStructure( cat, domain );
+      
+    fi;
+    
     SetIsAbelianCategoryWithEnoughProjectives( cat, true );
 
 	  AddEpimorphismFromSomeProjectiveObject( cat, ProjectiveCover );
@@ -30,6 +151,8 @@ InstallMethod( CategoryOfQuiverRepresentations,
 	  AddColift( cat, COMPUTE_COLIFT_IN_QUIVER_REPS );
 
 	  AddGeneratorsOfExternalHom( cat, BasisOfExternalHom );
+
+    ADD_HOMOMORPHISM_STRUCTURE_TO_CATEGORY_OF_QUIVER_REPRESENTATIONS( cat );
     
     AddRandomObjectByList( cat,
     
@@ -328,6 +451,7 @@ InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     return hom;
 end );
 
+## The methods needed to enhance the category with homomorphism structure
 ##
 InstallMethodWithCrispCache( BasisOfExternalHom,
   [ IsQuiverRepresentation, IsQuiverRepresentation ],
@@ -374,6 +498,29 @@ InstallMethod( CoefficientsOfLinearMorphism, # w.r.t BasisOfExternalHom
 
     return AsList( sol );
   
+end );
+
+InstallMethod( MultiplyWithElementInFieldForHomomorphismStructure,
+            [ IsMultiplicativeElement, IsQuiverRepresentationHomomorphism ],
+  function( e, phi )
+    local cat;
+    
+    cat := CapCategory( phi );
+    
+    if not HasFieldForHomomorphismStructure( cat ) then
+      
+      Error( "The attribute FieldForHomomorphismStructure must be set for the category of the given morphism!\n" );
+      
+    fi;
+    
+    if not e in FieldForHomomorphismStructure( cat ) then
+      
+      Error( "The given element must belong to the field of the homomorphism structure!\n" );
+      
+    fi;
+    
+    return e * phi;
+    
 end );
 
 InstallGlobalFunction( COMPUTE_LIFT_IN_QUIVER_REPS,

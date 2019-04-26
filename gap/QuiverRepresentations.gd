@@ -10,13 +10,25 @@ DeclareGlobalFunction( "PRODUCT_OF_QUIVER_REPRESENTATION_HOMOMORPHISMS" );
 
 if not IsBound( BasisOfExternalHom ) then
   
-  DeclareOperation( "BasisOfExternalHom", [ IsQuiverRepresentation, IsQuiverRepresentation ] );
+  DeclareOperation( "BasisOfExternalHom", [ IsCapCategoryObject, IsCapCategoryObject ] );
   
 fi;
 
 if not IsBound( CoefficientsOfLinearMorphism ) then
   
-  DeclareAttribute( "CoefficientsOfLinearMorphism", IsQuiverRepresentationHomomorphism );
+  DeclareAttribute( "CoefficientsOfLinearMorphism", IsCapCategoryMorphism );
+  
+fi;
+
+if not IsBound( FieldForHomomorphismStructure ) then
+  
+  DeclareAttribute( "FieldForHomomorphismStructure", IsCapCategory );
+  
+fi;
+
+if not IsBound( MultiplyWithElementInFieldForHomomorphismStructure ) then
+  
+  DeclareOperation( "MultiplyWithElementInFieldForHomomorphismStructure", [ IsMultiplicativeElement, IsCapCategoryMorphism ]  );
   
 fi;
  
