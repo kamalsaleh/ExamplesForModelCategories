@@ -491,7 +491,7 @@ end );
 # end );
 
 InstallGlobalFunction( PRODUCT_OF_QUIVER_ALGEBRAS,
-    function( Aq, m, n )
+  function( Aq, m, n )
     local k, Lmn, AL;
     k := LeftActingDomain( Aq );
     Lmn := LINEAR_RIGHT_QUIVER( k, m, n );
@@ -555,7 +555,7 @@ InstallGlobalFunction( PRODUCT_OF_QUIVER_REPRESENTATION_HOMOMORPHISMS,
 end );
 
 InstallGlobalFunction( CONVERT_COMPLEX_OF_QUIVER_REPS_TO_QUIVER_REP,
-    function( C, A  )
+  function( C, A  )
     local L, m, n, Q, dimension_vector, matrices1, matrices2, matrices;
 
     L := QuiverOfAlgebra( TensorProductFactors( A )[1] );
@@ -583,7 +583,7 @@ end );
 
 
 InstallGlobalFunction( CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM,
-    function( phi, A )
+  function( phi, A )
     local L,m,n, matrices, r1, r2;
     L := QuiverOfAlgebra( TensorProductFactors( A )[1] );
     m := ShallowCopy( Label( Vertex( L, 1 ) ) );
@@ -598,7 +598,7 @@ end );
 
 
 InstallGlobalFunction( CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER_REPS,
-    function( C1, C2, mor, A )
+  function( C1, C2, mor, A )
     local Q, L, q, m, n, mats;
     # Do the compatibility stuff
     Q := QuiverOfAlgebra( A );
@@ -622,7 +622,7 @@ InstallGlobalFunction( CONVERT_QUIVER_REP_MORPHISM_TO_COMPLEX_MORPHISM_OF_QUIVER
 end );
 
 InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS,
-    function( C1, C2 )
+  function( C1, C2 )
     local m, n, A, R1, R2, B;
 
     m := Minimum( ActiveLowerBound( C1 ), ActiveLowerBound( C2 ) ) + 1;
@@ -639,7 +639,7 @@ InstallGlobalFunction( GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS,
 end );
 
 InstallGlobalFunction( "COMPUTE_LIFTS_IN_COMPLEXES_OF_QUIVER_REPS",
-    function( f, g )
+  function( f, g )
     local m, n, A, f_, g_, lift;
     m := Minimum( ActiveLowerBound( Source(f) ), ActiveLowerBound( Source(g) ) ) + 1;
     n := Maximum( ActiveUpperBound( Source(f) ), ActiveUpperBound( Source(g) ) ) - 1;
@@ -663,7 +663,7 @@ InstallGlobalFunction( "COMPUTE_LIFTS_IN_COMPLEXES_OF_QUIVER_REPS",
 end );
 
 InstallGlobalFunction( "COMPUTE_COLIFTS_IN_COMPLEXES_OF_QUIVER_REPS",
-    function( f, g )
+  function( f, g )
     local m, n, A, f_, g_, colift;
     m := Minimum( ActiveLowerBound( Range(f) ), ActiveLowerBound( Range(g) ) ) + 1;
     n := Maximum( ActiveUpperBound( Range(f) ), ActiveUpperBound( Range(g) ) ) - 1;
