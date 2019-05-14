@@ -17,7 +17,7 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
                         return DimensionVector(a)[n]>DimensionVector(b)[n]; 
                         end );
     if u = i-1 and v = i then
-        return GeneratorsOfExternalHom( projectives[ 2 ], projectives[ 1 ] );
+        return BasisOfExternalHom( projectives[ 2 ], projectives[ 1 ] );
     fi;
 
     if u > v then
@@ -31,7 +31,7 @@ InstallMethodWithCrispCache( BasisBetweenTwistedStructureSheavesAsQuiverRepresen
         if v - u = 1 then
             u_index := Position( twists_of_projectives, u );
             v_index := Position( twists_of_projectives, v );
-            current_hom := GeneratorsOfExternalHom( projectives[ u_index ], projectives[ v_index ] );
+            current_hom := BasisOfExternalHom( projectives[ u_index ], projectives[ v_index ] );
             hom := [ current_hom[ 1 ] ];
             for t in [ 2 .. n ] do
                 current_L := BasisBetweenTwistedStructureSheavesAsQuiverRepresentations( A, i, u + 1, v + 1 );
