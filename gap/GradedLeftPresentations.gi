@@ -1,4 +1,7 @@
 
+BindGlobal( "EXAMPLES_FOR_MODEL_CATEGORIES",
+  rec( QQ := HomalgFieldOfRationals( ), ZZ := HomalgRingOfIntegers( ) ) );
+
 ##
 # InstallMethod( TwistFunctorOp, 
 #             [ IsHomalgGradedRing, IsInt ],
