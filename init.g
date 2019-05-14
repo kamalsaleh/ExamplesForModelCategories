@@ -9,4 +9,5 @@ ReadPackage( "ExamplesForModelCategories", "gap/GradedLeftPresentations.gd" );
 ReadPackage( "ExamplesForModelCategories", "gap/QuiverRepresentations.gd" );
 ReadPackage( "ExamplesForModelCategories", "gap/StructureBeilinsonQuiver.gd" );
 ReadPackage( "ExamplesForModelCategories", "gap/CoherentSheaves.gd" );
+ReadPackage( "ExamplesForModelCategories", "gap/FunctorCategories.gd" );
 
