@@ -77,38 +77,38 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
     
     A := QuotientOfPathAlgebra( kQ, v );
     
-    vector_bundles_quiver_reps := CategoryOfQuiverRepresentations( A );
+    #vector_bundles_quiver_reps := CategoryOfQuiverRepresentations( A );
     
     # ReadPackage( "ModelCategories", "examples/tools/Triangulated_Structure.g" );
     
     # Contructing the chains category and adding some basic opertions and the model structure to it.
-    chains_vector_bundles_quiver_reps := ChainComplexCategory( vector_bundles_quiver_reps: FinalizeCategory := false );
-    
-    AddLift( chains_vector_bundles_quiver_reps, COMPUTE_LIFTS_IN_COMPLEXES_OF_QUIVER_REPS );
-    
-    AddColift( chains_vector_bundles_quiver_reps, COMPUTE_COLIFTS_IN_COMPLEXES_OF_QUIVER_REPS );
-    
-    AddGeneratorsOfExternalHom( chains_vector_bundles_quiver_reps, GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS );
-    
-    ModelStructureOnChainComplexes( chains_vector_bundles_quiver_reps );
-    
-    AddAreLeftHomotopic( chains_vector_bundles_quiver_reps,
-        function( phi, psi )
-            return IsNullHomotopic( phi - psi );
-        end );
-    
-    Finalize( chains_vector_bundles_quiver_reps ); 
-    
-    homotopy_chains_vector_bundles_quiver_reps := HomotopyCategory( chains_vector_bundles_quiver_reps );
-    
-    AddTriangulatedStructure( homotopy_chains_vector_bundles_quiver_reps );
-    
-    Finalize( homotopy_chains_vector_bundles_quiver_reps );
-    
-      S := UnderlyingHomalgGradedPolynomialRing( A );
-    
-    PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
-    #LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES( S );
+   # chains_vector_bundles_quiver_reps := ChainComplexCategory( vector_bundles_quiver_reps: FinalizeCategory := false );
+   # 
+   # AddLift( chains_vector_bundles_quiver_reps, COMPUTE_LIFTS_IN_COMPLEXES_OF_QUIVER_REPS );
+   # 
+   # AddColift( chains_vector_bundles_quiver_reps, COMPUTE_COLIFTS_IN_COMPLEXES_OF_QUIVER_REPS );
+   # 
+   # AddGeneratorsOfExternalHom( chains_vector_bundles_quiver_reps, BASIS_OF_EXTERNAL_HOM_IN_CHAINS_OF_QUIVER_REPS );
+   # 
+   # ModelStructureOnChainComplexes( chains_vector_bundles_quiver_reps );
+   # 
+   # AddAreLeftHomotopic( chains_vector_bundles_quiver_reps,
+   #     function( phi, psi )
+   #         return IsNullHomotopic( phi - psi );
+   #     end );
+   # 
+   # Finalize( chains_vector_bundles_quiver_reps ); 
+   # 
+   # homotopy_chains_vector_bundles_quiver_reps := HomotopyCategory( chains_vector_bundles_quiver_reps );
+   # 
+   # AddTriangulatedStructure( homotopy_chains_vector_bundles_quiver_reps );
+   # 
+   # Finalize( homotopy_chains_vector_bundles_quiver_reps );
+   # 
+   #   S := UnderlyingHomalgGradedPolynomialRing( A );
+   # 
+   # PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
+   # #LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES( S );
     
     return A;
     
@@ -122,7 +122,7 @@ indec_projectives := ShallowCopy( IndecProjRepresentations( A ) );
 Sort( indec_projectives, function(u,v) return DimensionVector(u)<DimensionVector(v); end );
 
 n := Length( indec_projectives );
-morphisms := List( [ 1 .. n-1 ], i -> GeneratorsOfExternalHom( indec_projectives[i], indec_projectives[i+1] ) );
+morphisms := List( [ 1 .. n-1 ], i -> BasisOfExternalHom( indec_projectives[i], indec_projectives[i+1] ) );
 
 for j in [ 2 .. n-1] do
     current := [ ];
