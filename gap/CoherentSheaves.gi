@@ -251,7 +251,7 @@ BindGlobal( "_CotangentBeilinsonFunctorFromChains",
         
         SetLowerBound( rep, ActiveLowerBound( C ) - n + 1 );
         
-        obj := HomotopyCategoryObject( rep );
+        obj := HomotopyCategoryObject( homotopy_cat, rep );
         
         return obj;
         
