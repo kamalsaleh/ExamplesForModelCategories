@@ -176,12 +176,11 @@ function( S )
     	AddGeneratorsOfExternalHom( chains_graded_lp_cat_sym,
       
     	GENERATORS_OF_EXTERNAL_HOM_IN_CHAINS_OF_GRADED_LEFT_PRESENTATIONS );
+         
+    	homotopy_chains_graded_lp_cat_sym := HomotopyCategory( graded_lp_cat_sym );
       
-    	Finalize( chains_graded_lp_cat_sym );
-      
-    
-    	homotopy_chains_graded_lp_cat_sym := HomotopyCategory( chains_graded_lp_cat_sym );
-      
+     	Finalize( chains_graded_lp_cat_sym );
+     
 #    	AddTriangulatedStructure( homotopy_chains_graded_lp_cat_sym );
       
     	Finalize( homotopy_chains_graded_lp_cat_sym );
