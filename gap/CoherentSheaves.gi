@@ -398,6 +398,96 @@ BindGlobal( "_CotangentBeilinsonFunctor",
     
 end );
 
+##
+DeclareAttribute( "_TwistedCotangentSheavesToProjectiveQuiverRepsFunctor", IsQuiverAlgebra );
+
+InstallMethod( _TwistedCotangentSheavesToProjectiveQuiverRepsFunctor,
+  [ IsQuiverAlgebra ],
+  function( A )
+    local S, quivers, graded_lp_cat, F;
+  
+    S := UnderlyingHomalgGradedPolynomialRing( A );
+  
+    quivers := CategoryOfQuiverRepresentations( A );
+    graded_lp_cat := GradedLeftPresentations( S );
+  
+    F := CapFunctor( "to be named", graded_lp_cat, quivers );
+  
+    AddObjectFunction( F,
+      function( M )
+        local h;
+      
+        h := UniversalMorphismIntoZeroObject( M );
+      
+        h := MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS( h );
+      
+        h := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, h );
+      
+        return Source( h );
+      
+      end );
+  
+    AddMorphismFunction( F,
+      function( s, phi, r )
+        local h;
+       
+        h := MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS( phi );
+      
+        h := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, h );
+      
+        return h;
+      
+      end );
+  
+    return F;
+  
+end );
+
+##
+DeclareAttribute( "_ProjectiveQuiverRepsToTwistedCotangentSheavesFunctor", IsQuiverAlgebra );
+
+InstallMethod( _ProjectiveQuiverRepsToTwistedCotangentSheavesFunctor,
+  [ IsQuiverAlgebra ],
+  function( A )
+    local S, quivers, graded_lp_cat, F;
+  
+    S := UnderlyingHomalgGradedPolynomialRing( A );
+  
+    quivers := CategoryOfQuiverRepresentations( A );
+    graded_lp_cat := GradedLeftPresentations( S );
+  
+    F := CapFunctor( "to be named", quivers, graded_lp_cat );
+  
+    AddObjectFunction( F,
+      function( M )
+        local h;
+      
+        h := UniversalMorphismIntoZeroObject( M );
+      
+        h := MORPHISM_OF_PROJECTIVE_QUIVER_REPS_AS_LIST_OF_RECORDS( h );
+      
+        h := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, h );
+      
+        return Source( h );
+      
+      end );
+  
+    AddMorphismFunction( F,
+      function( s, phi, r )
+        local h;
+       
+        h := MORPHISM_OF_PROJECTIVE_QUIVER_REPS_AS_LIST_OF_RECORDS( phi );
+      
+        h := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES( S, h );
+      
+        return h;
+      
+      end );
+  
+    return F;
+  
+end );
+
 InstallMethod( StructureBeilinsonFunctor,
     [ IsQuiverAlgebra ],
     function( A )
