@@ -1696,3 +1696,118 @@ InstallMethodWithCrispCache( COEFFICIENTS_OF_LINEAR_MORPHISM,
   
 end );
 
+
+InstallMethod( MORPHISM_OF_PROJECTIVE_QUIVER_REPS_AS_LIST_OF_RECORDS,
+    [ IsQuiverRepresentationHomomorphism ],
+  function( f )
+    local cat, A, ind, n, morphisms, func;
+    
+    cat := CapCategory( f );
+    
+    A := AlgebraOfCategory( cat );
+    
+    ind := IndecProjRepresentations( A );
+    
+    n := Length( ind );
+    
+    ind := List( [ 1 .. n ], i -> TwistedCotangentSheafAsQuiverRepresentation( A, i - 1 ) );
+    
+    morphisms := MORPHISM_OF_PROJECTIVE_QUIVER_REPS_AS_LIST_OF_MORPHISMS( f );
+    
+    func := function( h )
+              local s, r, b, record;
+              
+              s := Position( ind, Source( h ) );
+              
+              if s = fail then
+                
+                s := -1;
+                
+              else
+                
+                s := s - 1;
+                
+              fi;
+              
+              r := Position( ind, Range( h ) );
+              
+              if r = fail then
+                
+                r := -1;
+                
+              else
+                
+                r := r - 1;
+                
+              fi;
+              
+              if s <> -1 and r <> -1 then
+                
+                b := BasisBetweenTwistedCotangentSheavesAsQuiverRepresentations( A, s, r );
+                
+              else
+                
+                b := [ ];
+                
+              fi;
+              
+              record := rec( );
+              
+              record!.indices := [ s, r ];
+              
+              record!.coefficients := COEFFICIENTS_OF_LINEAR_MORPHISM( b, h );
+              
+              return record;
+            
+              end;
+    
+    
+    return List( morphisms, a -> List( a, b -> func( b ) ) );
+    
+end );
+
+##
+InstallMethod( MORPHISM_OF_PROJECTIVE_QUIVER_REPS_AS_LIST_OF_MORPHISMS,
+    [ IsQuiverRepresentationHomomorphism ],
+function( phi )
+  local cat, source, range, list_of_sources, list_of_ranges, s, r, L;
+
+  cat := CapCategory( phi );
+  
+  source := Source( phi );
+  
+  range := Range( phi );
+  
+  list_of_sources := DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION( source );
+  
+  list_of_ranges := DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION( range );
+    
+  if list_of_sources = [  ] then
+      
+    list_of_sources := [ ZeroObject( cat ) ];
+        
+  fi;
+   
+  if list_of_ranges = [  ] then
+      
+    list_of_ranges := [ ZeroObject( cat ) ];
+        
+  fi;
+  
+  s := Length( list_of_sources );
+  
+  r := Length( list_of_ranges );
+  
+  L := List( [ 1 .. s ],
+        u -> List( [ 1 .. r ], v -> PreCompose(
+                [
+                    InjectionOfCofactorOfDirectSum( list_of_sources, u ),
+                    phi,
+                    ProjectionInFactorOfDirectSum( list_of_ranges, v )
+                ]
+            ) ) );
+    
+  return L;
+
+end );
+
