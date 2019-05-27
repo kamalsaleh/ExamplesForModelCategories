@@ -74,9 +74,9 @@ InstallMethod( StructureBeilinsonQuiverAlgebraOp,
 #	Finalize( homotopy_chains_vector_bundles_quiver_reps );
 #
 #	
-#	S := UnderlyingHomalgGradedPolynomialRing( A );
+S := UnderlyingHomalgGradedPolynomialRing( A );
 #
-#	PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
+PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
 
 return A;
 end );

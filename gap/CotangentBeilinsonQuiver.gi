@@ -105,9 +105,9 @@ InstallMethod( CotangentBeilinsonQuiverAlgebraOp,
    # 
    # Finalize( homotopy_chains_vector_bundles_quiver_reps );
    # 
-   #   S := UnderlyingHomalgGradedPolynomialRing( A );
+   S := UnderlyingHomalgGradedPolynomialRing( A );
    # 
-   # PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
+   PREPARE_CATEGORIES_OF_HOMALG_GRADED_POLYNOMIAL_RING( S );
    # #LIST_OF_MORPHISMS_BETWEEN_TWISTED_COTANGENT_BUNDLES( S );
     
     return A;

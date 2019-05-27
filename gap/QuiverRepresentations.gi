@@ -288,7 +288,14 @@ InstallMethod( CategoryOfQuiverRepresentations,
         return RandomMorphismWithFixedSourceAndRangeByList( M, N, [ 1 .. n ] * One( domain ) );
         
     end );
-     
+    
+    AddIsProjective( cat,
+      function( M )
+        
+        return IsMonomorphism( EpimorphismFromSomeProjectiveObject( M ) );
+    
+    end );
+    
     to_be_finalized := ValueOption( "FinalizeCategory" );
     
     if to_be_finalized = false then
@@ -1460,9 +1467,9 @@ InstallMethodWithCrispCache( DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION,
       
     fi;
     
-    if not HasIsProjective( P ) and IsProjective( P ) then
+    if not IsProjective( P ) then
       
-      Error( "The given object should have the property IsProjective!"  );
+      Error( "The given object should be projective!" );
       
     fi;
     
@@ -1810,4 +1817,5 @@ function( phi )
   return L;
 
 end );
+
 
