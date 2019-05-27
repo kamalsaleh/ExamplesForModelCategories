@@ -63,6 +63,60 @@ InstallMethod( NegativeKoszulChainMorphismOp,
     fi;
 end );
 
+##
+InstallMethod( MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_MORPHISMS, 
+    [ IsGradedLeftPresentationMorphism ],
+function( phi )
+  local source, range, S, cat, n, degrees_source, s, degrees_range, r, list_of_sources, list_of_ranges, L;
+
+  source := Source( phi );
+  
+  range := Range( phi );
+
+  S := UnderlyingHomalgRing( phi );
+  
+  cat := GradedLeftPresentations( S );
+  
+  n := Length( IndeterminatesOfPolynomialRing( S ) );
+
+  degrees_source := GeneratorDegrees( source );
+  
+  s := Length( degrees_source );
+
+  degrees_range := GeneratorDegrees( range );
+  
+  r := Length( degrees_range );
+
+  list_of_sources := List( degrees_source, d -> GradedFreeLeftPresentation( 1, S, [ d ] ) );
+    
+  if list_of_sources = [  ] then
+      
+    list_of_sources := [ ZeroObject( cat ) ];
+        
+  fi;
+    
+  list_of_ranges := List( degrees_range, d -> GradedFreeLeftPresentation( 1, S, [ d ] ) );
+    
+  if list_of_ranges = [  ] then
+      
+    list_of_ranges := [ ZeroObject( cat ) ];
+        
+  fi;
+  
+  L := List( [ 1 .. Maximum(1,s) ], u -> 
+            List( [ 1 .. Maximum(1,r) ], v -> PreCompose(
+                [
+                    InjectionOfCofactorOfDirectSum( list_of_sources, u ),
+                    phi,
+                    ProjectionInFactorOfDirectSum( list_of_ranges, v )
+                ]
+            ) ) );
+    
+  return L;
+
+end );
+
+##
 InstallMethod( MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS, 
     [ IsGradedLeftPresentationMorphism ],
 function( phi )

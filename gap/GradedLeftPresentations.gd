@@ -9,6 +9,7 @@ DeclareAttribute( "BeilinsonReplacement", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "BeilinsonReplacement2", IsGradedLeftPresentation );
 DeclareAttribute( "BeilinsonReplacement2", IsGradedLeftPresentationMorphism );
 
+DeclareAttribute( "MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_MORPHISMS", IsGradedLeftPresentationMorphism );
 
 DeclareAttribute( "MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
 DeclareAttribute( "MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS", IsGradedLeftPresentationMorphism );
