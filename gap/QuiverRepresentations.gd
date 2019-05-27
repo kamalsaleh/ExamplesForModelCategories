@@ -32,6 +32,9 @@ if not IsBound( CoefficientsOfLinearMorphism ) then
   
 fi;
 
+DeclareOperation( "COEFFICIENTS_OF_LINEAR_MORPHISM", [ IsList, IsCapCategoryMorphism ] );
+
+
 if not IsBound( FieldForHomomorphismStructure ) then
   
   DeclareAttribute( "FieldForHomomorphismStructure", IsCapCategory );

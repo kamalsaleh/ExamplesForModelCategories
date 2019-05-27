@@ -647,34 +647,7 @@ InstallMethod( CoefficientsOfLinearMorphism, # w.r.t BasisOfExternalHom
 
     hom_basis := BasisOfExternalHom( Source( f ), Range( f ) );
     
-    if hom_basis = [ ] then
-      
-      return [ ];
-      
-    fi;
-  
-    Q := QuiverOfRepresentation( Source( f ) );
-  
-    k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
-  
-    V := Vertices( Q );
-  
-    L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
-                                      List( hom_basis, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
-    
-    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
-    
-    L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
-
-    L := List( TransposedMat( L ), l -> StackMatricesVertically( l ) );
-    
-    vector := StandardVector( k, ColsOfMatrix( L[ 1 ] )[ 1 ] );
-    
-    mat := TransposedMat( StackMatricesHorizontally( List( [ 2 .. Length( L ) ], i -> L[ i ] ) ) );
-    
-    sol := SolutionMat( mat, vector );
-
-    return AsList( sol );
+    return COEFFICIENTS_OF_LINEAR_MORPHISM( hom_basis, f );
   
 end );
 
@@ -1684,5 +1657,42 @@ BindGlobal( "BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS2",
         
     return morphisms;
     
+end );
+
+##
+InstallMethodWithCrispCache( COEFFICIENTS_OF_LINEAR_MORPHISM,
+            [ IsList, IsQuiverRepresentationHomomorphism ],
+  function( hom_basis, f )
+    local Q, k, V, L, vector, mat, sol;
+
+    if hom_basis = [ ] then
+      
+      return [ ];
+      
+    fi;
+  
+    Q := QuiverOfRepresentation( Source( f ) );
+  
+    k := LeftActingDomain( AlgebraOfRepresentation( Source( f ) ) );
+  
+    V := Vertices( Q );
+  
+    L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
+                                      List( hom_basis, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
+    
+    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
+    
+    L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
+
+    L := List( TransposedMat( L ), l -> StackMatricesVertically( l ) );
+    
+    vector := StandardVector( k, ColsOfMatrix( L[ 1 ] )[ 1 ] );
+    
+    mat := TransposedMat( StackMatricesHorizontally( List( [ 2 .. Length( L ) ], i -> L[ i ] ) ) );
+    
+    sol := SolutionMat( mat, vector );
+
+    return AsList( sol );
+  
 end );
 
