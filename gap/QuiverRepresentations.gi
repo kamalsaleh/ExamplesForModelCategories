@@ -771,32 +771,21 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     return hom;
 end );
 
-## The methods needed to enhance the category with homomorphism structure
+## The methods are eeded to enhance the category with homomorphism structure
 ##
 InstallMethodWithCrispCache( BasisOfExternalHom,
   [ IsQuiverRepresentation, IsQuiverRepresentation ],
   function( a, b )
-    local B;
     
-    #if HasIsProjective( a ) and IsProjective( a ) and HasIsProjective( b ) and IsProjective( b ) then
-    #        
-    #  # This method is not quicker than BasisOfHom but it make it possible to compute
-    #  # Hom(a,b) for very big representations with out memory issues.
-    #  B := BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS( a, b );
-    #  
-    #  if B <> fail then
-    #    
-    #    return B;
-    #    
-    #  else
-    #    
-    #    return BasisOfHom( a, b );
-    #  
-    #  fi;
-    #  
-    #fi;
+    if IsProjective( a ) and IsProjective( b ) then
       
-    return BasisOfHom( a, b );
+      return BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS( a, b );
+    
+    else
+      
+      return BasisOfHom( a, b );
+    
+    fi;
     
 end );
 
