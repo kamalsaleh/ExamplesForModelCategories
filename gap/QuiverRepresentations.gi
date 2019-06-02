@@ -1635,7 +1635,7 @@ InstallMethodWithCrispCache( DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION,
       i -> RightMatrixOfLinearTransformation( MapForArrow( P, i ) ) );
     
     func := function( matrices )
-      local dims_of_matrices, p;
+      local dims_of_matrices, p, d;
       
       dims_of_matrices := List( matrices, DimensionsMat );
       
@@ -1821,7 +1821,7 @@ BindGlobal( "BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS2",
            
             current_temp[ i ][ j ] := phi;
             
-            Add( current_morphisms, current_temp );
+            Add( current_morphisms, MorphismBetweenDirectSums( current_temp ) );
          
           od;
         
