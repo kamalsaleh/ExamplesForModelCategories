@@ -443,43 +443,52 @@ end );
 InstallMethod( MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS, 
     [ IsGradedLeftPresentationMorphism ],
 function( phi)
-local source, range, G, mat, n, L, i, j, zero_obj, S;
+  local source, range, G, mat, n, L, i, j, zero_obj, S;
 
-source := Source( phi );
-range := Range( phi );
+  source := Source( phi );
+  range := Range( phi );
 
-S := UnderlyingHomalgRing( phi );
-n := Length( IndeterminatesOfPolynomialRing( S ) );
+  S := UnderlyingHomalgRing( phi );
+  n := Length( IndeterminatesOfPolynomialRing( S ) );
 
-L := List( [ 1 .. n ], k -> TwistedCotangentSheaf( S, k - 1 ) );
+  L := List( [ 1 .. n ], k -> TwistedCotangentSheaf( S, k - 1 ) );
 
-zero_obj := ZeroObject( CapCategory( phi ) );
-L := Concatenation( [ zero_obj ], L );
+  zero_obj := ZeroObject( CapCategory( phi ) );
+  L := Concatenation( [ zero_obj ], L );
 
-if Position( L, source ) = fail or Position( L, range ) = fail then
+  if Position( L, source ) = fail or Position( L, range ) = fail then
     # Well here phi is supposed to be morphism between direct sum of canonical twisted cotangent sheaves
     L := DECOMPOSE_MORPHISM_OF_DIRECT_SUM_OF_NON_CANONICAL_TWISTED_COTANGENT_SHEAVES( phi );
     return List( L, l -> List( l, f -> MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_LIST_OF_RECORDS( f )[1][1] ) );
-fi;
+  fi;
 
-i := Position( L, source )-2;
-j := Position( L, range )-2;
+  i := Position( L, source ) - 2;
+  j := Position( L, range ) - 2;
 
-if i = -1 or j = -1 then
-    return [ [ rec( indices := [i, j], coefficients := [] ) ] ];
-fi;
+  if i = -1 or j = -1 then
+    
+    return [ [ rec( indices := [ i, j ], coefficients := [ ] ) ] ];
+    
+  fi;
 
-if i<j then
-    return [ [ rec( indices := [i,j], coefficients := [] ) ] ];
-fi;
+  if i < j then
+    
+    return [ [ rec( indices := [ i, j ], coefficients := [ ] ) ] ];
+    
+  fi;
 
-G := ShallowCopy( BasisBetweenTwistedCotangentSheaves( S, i, j ) );
-#G := GeneratorsOfExternalHom( source, range );
-G := List( G, UnderlyingMatrix );
-G := UnionOfRows( List( G, 
+  G := ShallowCopy( BasisBetweenTwistedCotangentSheaves( S, i, j ) );
+  
+  G := List( G, UnderlyingMatrix );
+  
+  G := UnionOfRows( List( G,
     g -> UnionOfColumns( List( [ 1 .. NrRows( g ) ], i -> CertainRows( g, [i] ) ) ) ) );
-mat := UnderlyingMatrix( phi );
-mat := UnionOfColumns( List( [ 1 .. NrRows( mat ) ], i -> CertainRows( mat, [i] ) ) );
-return [ [ rec( indices := [i,j], coefficients := EntriesOfHomalgMatrix( RightDivide( mat, G) ) ) ] ];
+  
+  mat := UnderlyingMatrix( phi );
+  
+  mat := UnionOfColumns( List( [ 1 .. NrRows( mat ) ], i -> CertainRows( mat, [i] ) ) );
+  
+  return [ [ rec( indices := [ i, j ], coefficients := EntriesOfHomalgMatrix( RightDivide( mat, G) ) ) ] ];
+  
 end );       
 
