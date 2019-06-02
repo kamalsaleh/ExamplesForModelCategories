@@ -300,9 +300,13 @@ BindGlobal( "_CotangentBeilinsonFunctorFromChains",
     
 end );
 
-BindGlobal( "_CotangentBeilinsonFunctor",
-#    [ IsQuiverAlgebra ],
-    function( A )
+
+DeclareAttribute( "_CotangentBeilinsonFunctor", IsQuiverAlgebra );
+
+##
+InstallMethod( _CotangentBeilinsonFunctor,
+      [ IsQuiverAlgebra ],
+  function( A )
     local S, graded_lp_cat_sym, quiver_reps, chains_quiver_reps, homotopy_cat, name, F;
     
     S := UnderlyingHomalgGradedPolynomialRing( A );
@@ -398,6 +402,61 @@ BindGlobal( "_CotangentBeilinsonFunctor",
     
 end );
 
+DeclareAttribute( "_CotangentBeilinsonFunctor_Modified", IsQuiverAlgebra );
+
+##
+InstallMethod( _CotangentBeilinsonFunctor_Modified,
+      [ IsQuiverAlgebra ],
+  function( A )
+    local S, F, G;
+    
+    S := UnderlyingHomalgGradedPolynomialRing( A );
+    
+    F := _CotangentBeilinsonFunctor( A );
+    
+    G := CapFunctor( "modified version ....", AsCapCategory( Source( F ) ), AsCapCategory( Range( F ) ) );
+    
+    AddObjectFunction( G,
+      function( M )
+        local matrix, degrees, sheaves;
+        
+        matrix := UnderlyingMatrix( M );
+        
+        if NrRows( matrix ) <> 0 then
+          
+          Error( "The input should be direct sum of twisted structure sheaves" );
+          
+        fi;
+        
+        degrees := GeneratorDegrees( M );
+        
+        sheaves := List( degrees, d -> GradedFreeLeftPresentation( 1, S, [ d ] ) );
+        
+        if sheaves = [ ] then
+          
+          sheaves := [ ZeroObject( M ) ];
+        
+        fi;
+        
+        return DirectSum( List( sheaves, sheaf -> ApplyFunctor( F, sheaf ) ) );
+        
+      end );
+    
+    AddMorphismFunction( G,
+      function( source, phi, range )
+        local morphisms;
+      
+        morphisms := MORPHISM_OF_TWISTED_STRUCTURE_SHEAVES_AS_LIST_OF_MORPHISMS( phi );
+        
+        morphisms := List( morphisms, row -> List( row, morphism -> ApplyFunctor( F, morphism ) ) );
+        
+        return MorphismBetweenDirectSums( morphisms );
+        
+      end );
+    
+    return G;
+    
+end );
 ##
 DeclareAttribute( "_TwistedCotangentSheavesToProjectiveQuiverRepsFunctor", IsQuiverAlgebra );
 
