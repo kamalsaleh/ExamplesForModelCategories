@@ -1684,17 +1684,21 @@ InstallMethodWithCrispCache( DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION,
                       [ l[ 2 ] + 1 .. DimensionsMat( m )[ 2 ] ] );
       end );
       
-      return Concatenation( [ ind_A[ p ] ], func( matrices ) );
+      d := func( matrices );
+      
+      if d <> fail then
+        
+        return Concatenation( [ ind_A[ p ] ], d );
+        
+      else
+        
+        return fail;
+        
+      fi;
     
     end;
     
     d := func( matrices_of_P );
-    
-    if fail in d then
-      
-      return fail;
-      
-    fi;
     
     return d;
     
@@ -1702,25 +1706,40 @@ end );
 
 InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS,
   function( P1, P2 )
-    local cat, D1, D2, m, n, morphisms, current_morphisms, hom, D_1_to_i_minus_1,
-      D_2_to_j_minus_1, z1, D_i_plus_1_to_m, D_j_plus_1_to_n, z2, i, j, phi;
+    local cat, A, D1, D2, m, n, morphisms, current_morphisms, hom, D_1_to_i_minus_1, D_2_to_j_minus_1, D_i_plus_1_to_m, D_j_plus_1_to_n, z1, z2, i, j, phi, N;
     
     cat := CapCategory( P1 );
+    
+    A := AlgebraOfCategory( cat );
+    
+    N := Maximum( ( 6 - Length( IndecProjRepresentations( A ) ) ) * 6 + 1, 1 );
     
     D1 := DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION( P1 );
     
     D2 := DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION( P2 );
     
-    if D1 = fail or D2 = fail then
+    if D1 = fail then
       
-      Error( "?" );
+      D1 := [ P1 ];
+    
+    fi;
+    
+    if D2 = fail then
       
+      D2 := [ P2 ];
+    
     fi;
     
     m := Length( D1 );
     
     n := Length( D2 );
-     
+    
+    if m <= N and n <= N then
+      
+      return BasisOfHom( P1, P2 );
+      
+    fi;
+    
     morphisms := [ ];
     
     for i in [ 1 .. m ] do
@@ -1730,36 +1749,45 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENT
         current_morphisms := [ ];
         
         hom := BasisOfHom( D1[ i ], D2[ j ] );
-       
+        
+        if m = 1 and n = 1 then
+          
+          return hom;
+        
+        fi;
+        
         if hom <> [ ] then
           
           D_1_to_i_minus_1 := Concatenation( [ ZeroObject( cat ) ], D1{ [1 .. i - 1 ] } );
+          
           D_2_to_j_minus_1 := Concatenation( [ ZeroObject( cat ) ], D2{ [1 .. j - 1 ] } );
-           
+          
           D_i_plus_1_to_m := Concatenation( [ ZeroObject( cat ) ], D1{ [ i + 1 .. m ] } );
+          
           D_j_plus_1_to_n := Concatenation( [ ZeroObject( cat ) ], D2{ [ j + 1 .. n ] } ); 
           
           z1 := ZeroMorphism( DirectSum( D_1_to_i_minus_1 ), DirectSum( D_2_to_j_minus_1 ) );
+          
           z2 := ZeroMorphism( DirectSum( D_i_plus_1_to_m ), DirectSum( D_j_plus_1_to_n ) );
           
           for phi in hom do
-           
-            Add( current_morphisms,  
-              DirectSumFunctorial( 
-                [ z1, phi, z2 ] 
-              ) 
+            
+            Add( current_morphisms,
+              DirectSumFunctorial(
+                [ z1, phi, z2 ]
+              )
             );
-         
-          od;
-        
-          morphisms := Concatenation( morphisms, current_morphisms );
           
-        fi;
+          od;
+          
+          morphisms := Concatenation( morphisms, current_morphisms );
         
+        fi;
+      
       od;
       
     od;
-        
+    
     return morphisms;
     
 end );
