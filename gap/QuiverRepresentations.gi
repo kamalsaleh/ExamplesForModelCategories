@@ -535,6 +535,20 @@ InstallMethod( StackMatricesDiagonally, [ IsDenseList ],
     
 end );
 
+InstallGlobalFunction( STACK_LISTLIST_QPA_MATRICES,
+  function( matrices )
+    
+    if matrices = [] or matrices[ 1 ] = [ ] then
+      
+      Error( "The input should not be or contain empty lists\n" );
+    
+    else
+      
+      return StackMatricesVertically( List( matrices, StackMatricesHorizontally ) );
+      
+    fi;
+    
+end );
 ##
 InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     function( S, R )
