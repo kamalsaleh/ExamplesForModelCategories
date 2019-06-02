@@ -430,44 +430,101 @@ function( R1, R2, maps )
   fi;
  
   cat := CapCategory( R1 );
+  
   if not IsIdenticalObj( cat, CapCategory( R2 ) ) then
+    
     Error( "representations in different categories" );
+    
   fi;
+  
   ucat := VectorSpaceCategory( cat );
 
   Q := QuiverOfRepresentation( R1 );
+  
   if Length( maps ) > NumberOfVertices( Q ) then
+    
     Error( "too many maps for representation homomorphism: ", Length( maps ), " maps, ",
            "but only ", NumberOfVertices( Q ), " vertices in quiver" );
   fi;
 
   morphisms := [];
+  
   for i in [ 1 .. NumberOfVertices( Q ) ] do
+    
     V1 := VectorSpaceOfRepresentation( R1, i );
+    
     V2 := VectorSpaceOfRepresentation( R2, i );
+    
     if not IsBound( maps[ i ] ) then
+      
       morphism := ZeroMorphism( V1, V2 );
+      
     else
+      
       m := maps[ i ];
+      
       if IsCapCategoryMorphism( m ) then
+        
         if not IsIdenticalObj( CapCategory( m ), ucat ) then
+          
           Error( "morphism for vertex ", Vertex( Q, i ), " is from wrong category" );
+          
         elif Source( m ) <> V1 then
-          Error( "morphism for vertex ", Vertex( Q, i ), " has wrong source",
+        
+          Error( "morphism for vertex ", Vertex( Q, i ), " has wrong source",  
                  " (is ", Source( m ), ", should be ", V1, ")" );
+        
         elif Range( m ) <> V2 then
+        
           Error( "morphism for vertex ", Vertex( Q, i ), " has wrong range",
                  " (is ", Range( m ), ", should be ", V2, ")" );
+          
         fi;
+        
         morphism := m;
+        
       else
+        
         morphism := LinearTransformationConstructor( cat )( V1, V2, m );
+        
       fi;
+      
     fi;
+    
     Add( morphisms, morphism );
+    
   od;
 
   return QuiverRepresentationHomomorphismNC( R1, R2, morphisms );
+  
+end );
+
+##
+InstallMethod( IndecProjRepresentations,
+               [ IsQuiverAlgebra and IsRightQuiverAlgebra ],
+function( A )
+  local default, indec, p;
+
+  default := ValueOption( "Default" );
+  
+  if default = true then
+    
+    TryNextMethod( );
+    
+  else
+    
+    indec := IndecProjRepresentations( A : Default := true );
+    
+    for p in indec do
+      
+      SetIsProjective( p, true );
+      
+    od;
+    
+    return indec;
+    
+  fi;
+  
 end );
 
 ##
