@@ -119,7 +119,7 @@ InstallMethod( CategoryOfQuiverRepresentations,
               [ IsQuiverAlgebra and IsRightQuiverAlgebra ],
               1000,
   function( A )
-    local add_extra_methods, cat, FinalizeCategory, AddExtraMethods, to_be_finalized, domain;
+    local add_extra_methods, cat, to_be_finalized, domain;
     
     add_extra_methods := ValueOption( "AddExtraMethods" );
     
@@ -289,12 +289,94 @@ InstallMethod( CategoryOfQuiverRepresentations,
         
     end );
     
+    AddEpimorphismFromSomeProjectiveObject( cat,
+      function( M )
+        local pi;
+        
+        pi := ProjectiveCover( M );
+        
+        SetIsProjective( Source( pi ), true );
+        
+        return pi;
+        
+      end );
+    
     AddIsProjective( cat,
       function( M )
         
         return IsMonomorphism( EpimorphismFromSomeProjectiveObject( M ) );
     
     end );
+    
+    AddDirectSum( cat,
+      function( summands )
+        local dimension_vector, matrices, d, l, N, d1, d2;
+        
+        if Length( summands ) = 1 then
+          
+          return summands[ 1 ];
+          
+        elif Length( summands ) = 2 then
+          
+          dimension_vector := Sum( List( summands, DimensionVector ) );
+          
+          matrices := List( summands, MatricesOfRepresentation );
+          
+          matrices := List( Transpose( matrices ), StackMatricesDiagonally );
+          
+          d := QuiverRepresentation( A, dimension_vector, matrices );
+          
+          l := List( summands, i -> [ i, "IsProjective", true ] );
+          
+          AddToToDoList( ToDoListEntry( l,
+            function( )
+              
+              SetIsProjective( d, true );
+            
+            end ) );
+          
+          return d;
+        
+        else
+          
+          N := Length( summands );
+          
+          d1 := DirectSum( summands{ [ 1 .. Int( N/2 ) ] } );
+          
+          d2 := DirectSum( summands{ [ Int( N/2 ) + 1 .. N ] } );
+          
+          return DirectSum( d1, d2 );
+        
+        fi;
+      
+      end );
+    
+    AddDirectSumFunctorialWithGivenDirectSums( cat,
+      
+      function( D1, morphisms, D2 )
+        local matrices;
+        
+        matrices := List( morphisms, MatricesOfRepresentationHomomorphism );
+        
+        matrices := List( Transpose( matrices ), StackMatricesDiagonally );
+        
+        return QuiverRepresentationHomomorphism( D1, D2, matrices );
+        
+      end );
+    
+    AddMorphismBetweenDirectSums( cat,
+      function( D1, morphisms, D2 )
+        local matrices;
+        
+        matrices := List( [ 1 .. NumberOfVertices( QuiverOfAlgebra( A ) ) ],
+                      i -> STACK_LISTLIST_QPA_MATRICES(
+                        List( morphisms,
+                          row -> List( row,
+                            morphism -> MatricesOfRepresentationHomomorphism( morphism )[ i ] ) ) ) );
+         
+        return QuiverRepresentationHomomorphism( D1, D2, matrices );
+        
+      end );
     
     to_be_finalized := ValueOption( "FinalizeCategory" );
     
@@ -330,6 +412,7 @@ function( cat, objects, morphisms )
   
 end );
 
+##
 InstallMethod( QuiverRepresentationHomomorphism,
                "for quiver representations and list",
                [ IsQuiverRepresentation, IsQuiverRepresentation,
