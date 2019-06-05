@@ -983,15 +983,16 @@ InstallMethodWithCrispCache( BasisOfExternalHom,
   [ IsQuiverRepresentation, IsQuiverRepresentation ],
   function( a, b )
     
-    if IsProjective( a ) and IsProjective( b ) then
-      
-      return BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS( a, b );
-    
-    else
-      
-      return BasisOfHom( a, b );
-    
-    fi;
+    return BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS_OVER_DEFAULT_HOMALG_FIELD( a, b );
+    #if IsProjective( a ) and IsProjective( b ) then
+    #  
+    #  return BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS( a, b );
+    #
+    #else
+    #   
+    #  return BasisOfHom( a, b );
+    #
+    #fi;
     
 end );
 
