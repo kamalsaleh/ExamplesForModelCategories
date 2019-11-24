@@ -16,6 +16,8 @@ graded_lp_cat_sym := GradedLeftPresentations( S );
 coh := CoherentSheavesOverProjectiveSpace( S );
 Sh := CanonicalProjection( coh );
 
+H0 := HomologyFunctorAt( ChainComplexCategory( graded_lp_cat_sym ), graded_lp_cat_sym, 0 );
+
 test := function( N )
 local u, v, m_u, m_v, M, i, reg;
 
@@ -92,4 +94,30 @@ for v in [ u + 1 .. u + 4 ] do
 od;
 od;
 end;
+
+test_natural_transformation := function( f )
+  local sf, u, v, h0, i;
+
+u := MorphismFromZerothHomologyOfBeilinsonReplacementToGLP( Source( f ) );
+Display( "u is computed" );
+
+v := MorphismFromZerothHomologyOfBeilinsonReplacementToGLP( Range( f ) );
+Display( "v is computed" );
+
+h0 := ApplyFunctor( PreCompose( H0, Sh ), BeilinsonReplacement( f ) );
+Display( "h0 is computed" );
+
+sf := ApplyFunctor( Sh, f );
+
+if not IsCongruentForMorphisms( PreCompose( u, sf ), PreCompose( h0, v ) ) then
+  Error( "Alarammmmm" );
+else
+  Display( "OK" );
+fi;
+
+end;
+
+
+
+
 

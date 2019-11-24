@@ -143,6 +143,7 @@ InstallMethod( CotangentBeilinsonFunctor,
     function( A )
     local S, graded_lp_cat_sym, chains_graded_lp_cat_sym, quiver_reps, chains_quiver_reps,
     homotopy_cat, name, F;
+    Error( "This method needs update :)" );
     S := UnderlyingHomalgGradedPolynomialRing( A );
     graded_lp_cat_sym := GradedLeftPresentations( S );
     chains_graded_lp_cat_sym := ChainComplexCategory( graded_lp_cat_sym );
@@ -264,9 +265,9 @@ BindGlobal( "_CotangentBeilinsonFunctorFromChains",
         
         Tphi := TateResolution( phi );
         
-        rep_source := source;
+        rep_source := UnderlyingChainComplex( source );
         
-        rep_range := range;
+        rep_range := UnderlyingChainComplex( range );
         
         l := Maximum( ActiveLowerBound( rep_source ), ActiveLowerBound( rep_range ) );
         
@@ -325,6 +326,10 @@ InstallMethod( _CotangentBeilinsonFunctor,
       function( C )
         local TC, n, diff, diffs, rep, L, obj;
         
+        Print( "_CotangentBeilinsonFunctor ... applied on:\n" );
+        View(C);
+        Print( "\n" );
+       
         TC := TateResolution( C );
         
         n := Length( IndeterminatesOfPolynomialRing( S ) );
@@ -339,7 +344,13 @@ InstallMethod( _CotangentBeilinsonFunctor,
               
               L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( TC^i );
               
-              return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+              #Print( "The list of records has dimensions ", Length( L ), " X ", Length( L[ 1 ] ), "\n" );
+             
+              L := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+              
+              #Print( "Done!\n" );
+              
+              return L;
               
             fi;
           
@@ -384,7 +395,13 @@ InstallMethod( _CotangentBeilinsonFunctor,
               
               L := MORPHISM_OF_TWISTED_OMEGA_MODULES_AS_LIST_OF_RECORDS( Tphi[ i ] );
               
-              return LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+              #Print( "The list of records has dimensions ", Length( L ), " X ", Length( L[ 1 ] ), "\n" );
+              
+              L := LIST_OF_RECORDS_TO_MORPHISM_OF_TWISTED_COTANGENT_SHEAVES_AS_QUIVER_REPS( A, L );
+              
+              #Print( "Done!\n" );
+              
+              return L;
               
             fi;
             
@@ -419,6 +436,10 @@ InstallMethod( _CotangentBeilinsonFunctor_Modified,
     AddObjectFunction( G,
       function( M )
         local matrix, degrees, sheaves;
+       
+        Print( "_CotangentBeilinsonFunctor_Modified ... applied on:\n" );
+        View(M);
+        Print( "\n" );
         
         matrix := UnderlyingMatrix( M );
         
@@ -505,6 +526,7 @@ end );
 ##
 DeclareAttribute( "_ProjectiveQuiverRepsToTwistedCotangentSheavesFunctor", IsQuiverAlgebra );
 
+##
 InstallMethod( _ProjectiveQuiverRepsToTwistedCotangentSheavesFunctor,
   [ IsQuiverAlgebra ],
   function( A )
@@ -547,6 +569,7 @@ InstallMethod( _ProjectiveQuiverRepsToTwistedCotangentSheavesFunctor,
   
 end );
 
+##
 InstallMethod( StructureBeilinsonFunctor,
     [ IsQuiverAlgebra ],
     function( A )
@@ -608,6 +631,20 @@ InstallMethod( StructureBeilinsonFunctor,
     return F;
 end );
 
+##
+InstallMethod( \*, [ IsRingElement, IsSerreQuotientCategoryMorphism ],
+  function( a, phi )
+    local coh, generalized_morphism;
+    coh := CapCategory( phi );
+    generalized_morphism := UnderlyingGeneralizedMorphism( phi );
+    return SerreQuotientCategoryMorphism( coh,
+      GeneralizedMorphismByThreeArrows(
+        SourceAid( generalized_morphism ),
+          a * Arrow( generalized_morphism ),
+            RangeAid( generalized_morphism ) ) );
+end );
+
+##
 BindGlobal( "ALLOWED_INDICES_FOR_STRUCTURE_BEILINSON_ALGEBRA",
     function( A, i )
     local n,j;

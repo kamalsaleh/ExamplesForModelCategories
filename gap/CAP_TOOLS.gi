@@ -64,7 +64,7 @@ if not IsBound( FieldForHomomorphismStructure ) then
 fi;
 
 ##
-InstallMethod( FieldForHomomorphismStructure, [ IsCapMatrixCategory ], CommutativeRingOfLinearCategory );
+InstallMethod( FieldForHomomorphismStructure, [ IsCapCategory ], CommutativeRingOfLinearCategory );
  
 if not IsBound( CoefficientsOfLinearMorphism ) then
   

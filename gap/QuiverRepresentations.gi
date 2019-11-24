@@ -94,7 +94,8 @@ BindGlobal( "ADD_HOMOMORPHISM_STRUCTURE_TO_CATEGORY_OF_QUIVER_REPRESENTATIONS",
         
         B := BasisOfExternalHom( a, b );
         
-        L := List( [ 1 .. Length( coeff ) ], i -> MultiplyWithElementInFieldForHomomorphismStructure( coeff[ i ], B[ i ] ) );
+        L := List( [ 1 .. Length( coeff ) ], 
+          i -> MultiplyWithElementInFieldForHomomorphismStructure( coeff[ i ], B[ i ] ) );
         
         if L = [  ] then
           
@@ -150,144 +151,10 @@ InstallMethod( CategoryOfQuiverRepresentations,
     ADD_HOMOMORPHISM_STRUCTURE_TO_CATEGORY_OF_QUIVER_REPRESENTATIONS( cat );
     
     # Lift and Colift can be derived from the homomorphism structure, but the following is quicker
-	  AddLift( cat, COMPUTE_LIFT_IN_QUIVER_REPS );
-
+	  
+    AddLift( cat, COMPUTE_LIFT_IN_QUIVER_REPS );
+    
 	  AddColift( cat, COMPUTE_COLIFT_IN_QUIVER_REPS );
-
-    AddRandomObjectByList( cat,
-    
-      function( C, l )
-        local indec_proj, s, r, source, range, L;
-        
-        indec_proj := IndecProjRepresentations( A );
-        
-        s := l[ 1 ];
-        
-        r := l[ 2 ];
-        
-        source := List( [ 1 .. s ], i -> Random( indec_proj ) );
-        
-        range := List( [ 1 .. r ], i -> Random( indec_proj ) );
-        
-        L := List( [ 1 .. s ],
-          i -> List( [ 1 .. r ],
-            j -> Random(
-              Concatenation(
-                BasisOfExternalHom( source[ i ], range[ j ] ),
-                [ ZeroMorphism(source[ i ], range[ j ] ) ]
-                           )
-              ) ) );
-        
-        return CokernelObject( MorphismBetweenDirectSums( L ) );
-        
-    end );
-
-    AddRandomObjectByInteger( cat,
-    
-      function( C, n )
-        
-        return RandomObjectByList( C, [ n, n ] );
-        
-    end );
-   
-    AddRandomMorphismWithFixedRangeByList( cat,
-    
-      function( M, L )
-        local pi, K, H;
-        
-        if not ForAll( L, l -> l in domain ) then
-          
-          Error( "All entries should belong to the acting domain of the algebra" );
-          
-        fi;
-        
-        pi := ProjectiveCover( M );
-        
-        K := KernelObject( pi );
-        
-        if IsZero( K ) then
-          
-          K := Source( pi );
-          
-        fi;
-        
-        H := BasisOfExternalHom( K, M );
-        
-        H := Concatenation( H, [ ZeroMorphism( K, M ) ] );
-        
-        return Sum( List( L, l -> l * Random( H ) ) );
-        
-     end );
-    
-    AddRandomMorphismWithFixedRangeByInteger( cat,
-     
-      function( M, n )
-        
-        return RandomMorphismWithFixedRangeByList( M, [ 1 .. n ] * One( domain ) );
-        
-    end );
-    
-    AddRandomMorphismWithFixedSourceByList( cat,
-    
-      function( M, L )
-        local iota, K, H;
-        
-        if not ForAll( L, l -> l in domain ) then
-          
-          Error( "All entries should belong to the acting domain of the algebra" );
-          
-        fi;
-        
-        iota := InjectiveEnvelope( M );
-        
-        K := CokernelObject( iota );
-        
-        if IsZero( K ) then
-          
-          K := Range( iota );
-          
-        fi;
-        
-        H := BasisOfExternalHom( M, K );
-        
-        H := Concatenation( H, [ ZeroMorphism( M, K ) ] );
-        
-        return Sum( List( L, l -> l * Random( H ) ) );
-        
-    end );
-    
-    AddRandomMorphismWithFixedSourceByInteger( cat,
-     
-      function( M, n )
-        
-        return RandomMorphismWithFixedSourceByList( M, [ 1 .. n ] * One( domain ) );
-        
-    end );
-    
-    AddRandomMorphismWithFixedSourceAndRangeByList( cat,
-      
-      function( M, N, L )
-        local H;
-        
-        H := BasisOfExternalHom( M, N );
-        
-        if H = [ ] then
-          
-          return ZeroMorphism( M, N );
-          
-        fi;
-        
-        return Sum( List( H, h -> Random( L ) * h ) );
-        
-    end );
-    
-    AddRandomMorphismWithFixedSourceAndRangeByInteger( cat,
-      
-      function( M, N, n )
-        
-        return RandomMorphismWithFixedSourceAndRangeByList( M, N, [ 1 .. n ] * One( domain ) );
-        
-    end );
     
     AddEpimorphismFromSomeProjectiveObject( cat,
       function( M )
@@ -570,7 +437,6 @@ BindGlobal( "CHAIN_AND_COCHAIN_CATEGORIES_CONSTRUCTOR",
         
         # Lift and Colift can be derived from the homomorphism structure, but the following is much quicker
         AddLift( complexes, COMPUTE_LIFT_IN_COMPLEXES_OF_QUIVER_REPS );
-    
         AddColift( complexes, COMPUTE_COLIFT_IN_COMPLEXES_OF_QUIVER_REPS );
         
         # Adding the homomorphism structure this way is at least 50 times better than the standard derivation of homomorphism structure
@@ -689,6 +555,7 @@ InstallGlobalFunction( STACK_LISTLIST_QPA_MATRICES,
     fi;
     
 end );
+
 ##
 InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     function( S, R )
@@ -936,7 +803,7 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS_OVER_HOMALG_FIELD,
     
     #Print( "I am going to compute columns syzygies of a ", NrRows( mat ), " X ", NrCols( mat ), " homalg matrix ...\n"  );
     mat := SyzygiesOfColumns( mat );
-    #Print( "Syzygies has been computed!\n" );
+    #Print( "Syzygies matrix ", NrRows( mat ), " X ", NrCols( mat ), " has been computed.\n" );
     
     if mat = fail then
       
@@ -1418,6 +1285,7 @@ InstallGlobalFunction( PRODUCT_OF_QUIVER_REPRESENTATION_HOMOMORPHISMS,
     
 end );
 
+DeclareAttribute( "TensorProductFunctor", IsQuiverAlgebra );
 
 InstallMethod( TensorProductFunctor,
   [ IsQuiverAlgebra and HasTensorProductFactors ],
@@ -1554,7 +1422,7 @@ InstallGlobalFunction( COMPUTE_LIFT_IN_COMPLEXES_OF_QUIVER_REPS,
     
     g_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( g, A );
 
-    lift := COMPUTE_LIFT_IN_QUIVER_REPS( f_, g_ );
+    lift := Lift( f_, g_ );
 
     if lift = fail then
       
@@ -1590,7 +1458,7 @@ InstallGlobalFunction( COMPUTE_COLIFT_IN_COMPLEXES_OF_QUIVER_REPS,
     
     g_ := CONVERT_COMPLEX_MORPHISM_OF_QUIVER_REPS_TO_QUIVER_REP_MORPHISM( g, A );
 
-    colift := COMPUTE_COLIFT_IN_QUIVER_REPS( f_, g_ );
+    colift := Colift( f_, g_ );
 
     if colift = fail then
       
@@ -1908,7 +1776,7 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENT
     
     A := AlgebraOfCategory( cat );
     
-    N := Maximum( ( 6 - Length( IndecProjRepresentations( A ) ) ) * 6 + 1, 1 );
+    N := Maximum( ( 6 - Length( IndecProjRepresentations( A ) ) ) * 6 + 1, 2 );
     
     D1 := DECOMPOSITION_OF_PROJECTIVE_QUIVER_REPRESENTATION( P1 );
     
@@ -1988,6 +1856,7 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENT
     
 end );
 
+##
 BindGlobal( "BASIS_OF_EXTERNAL_HOM_BETWEEN_PROJECTIVE_QUIVER_REPRESENTATIONS2",
   function( P1, P2 )
     local cat, D1, D2, m, n, morphisms, temp, current_morphisms, current_temp, hom, i, j, phi;
@@ -2064,8 +1933,8 @@ InstallMethodWithCrispCache( COEFFICIENTS_OF_LINEAR_MORPHISM,
   
     L := List( V, v -> Concatenation( [ RightMatrixOfLinearTransformation( MapForVertex( f, v ) ) ],
                                       List( hom_basis, h -> RightMatrixOfLinearTransformation( MapForVertex( h, v ) ) ) ) );
-    
-    L := Filtered( L, l -> ForAll( l, m -> not IsZero( DimensionsMat( m )[ 1 ]*DimensionsMat( m )[ 2 ] ) ) );
+     
+    L := Filtered( L, l -> ForAll( l, m -> not ForAny( DimensionsMat( m ), IsZero ) ) );
     
     L := List( L, l ->  List( l, m -> MatrixByCols( k, [ Concatenation( ColsOfMatrix( m ) ) ] ) ) );
 

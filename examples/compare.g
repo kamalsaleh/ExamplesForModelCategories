@@ -1,0 +1,10 @@
+LoadPackage( "ExamplesforM" );
+A := CotangentBeilinsonQuiverAlgebra( Rationals, 3 );
+S := UnderlyingHomalgGradedPolynomialRing(A);
+graded_lp_cat := GradedLeftPresentations( S );
+chains := ChainComplexCategory( graded_lp_cat );
+F := _CotangentBeilinsonFunctor(A);
+F_modified := _CotangentBeilinsonFunctor_Modified(A);
+C := RANDOM_CHAIN_COMPLEX( chains, -10, 10, 2 );
+p := AsChainComplex( ProjectiveResolution(C) );
+SetUpperBound(p,11);

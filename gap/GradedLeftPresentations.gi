@@ -35,7 +35,7 @@ InstallMethod( PositiveKoszulChainMorphismOp,
         range := StalkChainComplex( C[0], 0 );
         return ChainMorphism( source, range, [ C^1 ], 0 );
     else
-        F := ExtendFunctorToChainComplexCategoryFunctor( TwistFunctor( S, i ) );
+        F := ExtendFunctorToChainComplexCategories( TwistFunctor( S, i ) );
         return ApplyFunctor( F, PositiveKoszulChainMorphism( S, 0 ) );
     fi;
 end );
@@ -55,10 +55,10 @@ InstallMethod( NegativeKoszulChainMorphismOp,
         source := StalkChainComplex( C[ n ], 0 );
         range := ChainComplex( List( [ 1 .. n - 1 ], i-> C^i ), -n + 2 );
         phi := ChainMorphism( source, range, [ C^n ], 0 );
-        F := ExtendFunctorToChainComplexCategoryFunctor( TwistFunctor( S, n ) );
+        F := ExtendFunctorToChainComplexCategories( TwistFunctor( S, n ) );
         return ApplyFunctor( F, phi );
     else
-        F := ExtendFunctorToChainComplexCategoryFunctor( TwistFunctor( S, i ) );
+        F := ExtendFunctorToChainComplexCategories( TwistFunctor( S, i ) );
         return ApplyFunctor( F, NegativeKoszulChainMorphism( S, 0 ) );
     fi;
 end );
