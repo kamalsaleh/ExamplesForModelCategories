@@ -694,6 +694,148 @@ InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS,
     
 end );
 
+#BindGlobal( "BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS_OVER_HOMALG_FIELD",
+#  function( S, R, field )
+#    local A, quiver, domain, S_dimensions, R_dimensions, nr_of_vertices, mat, nr_of_arrows, source_of_arrow, range_of_arrow, S_i, R_i, id_1, id_2, nr_rows_of_block, u, v, nr_cols_in_block1, block_1, block_2, nr_cols_in_block3, block_3, block_4, nr_cols_in_block5, block_5, block, matrices, nr_cols, i;
+#   
+#    A := AlgebraOfRepresentation( S );
+#    
+#    quiver := QuiverOfAlgebra( A );
+#    
+#    domain := LeftActingDomain( A );
+#    
+#    S_dimensions := DimensionVector( S );
+#    
+#    R_dimensions := DimensionVector( R );
+#    
+#    nr_of_vertices := Length( S_dimensions );
+#    
+#    mat := HomalgZeroMatrix( 0, S_dimensions * R_dimensions, field );
+#   
+#    nr_of_arrows := NumberOfArrows( quiver );
+#
+#    for i in [ 1 .. nr_of_arrows ] do
+#      
+#      source_of_arrow := VertexIndex( Source( Arrow( quiver, i ) ) );
+#      
+#      range_of_arrow := VertexIndex( Target( Arrow( quiver, i ) ) );
+#      
+#      S_i := RightMatrixOfLinearTransformation( MapForArrow( S, i ) );
+#      
+#      S_i := HomalgMatrix( RowsOfMatrix( S_i ), DimensionsMat( S_i )[ 1 ], DimensionsMat( S_i )[ 2 ], field );
+#      
+#      R_i := RightMatrixOfLinearTransformation( MapForArrow( R, i ) );
+#      
+#      R_i := HomalgMatrix( RowsOfMatrix( R_i ), DimensionsMat( R_i )[ 1 ], DimensionsMat( R_i )[ 2 ], field );
+#      
+#      id_1 := HomalgIdentityMatrix( NrRows( S_i ), field );
+#      
+#      id_2 := HomalgIdentityMatrix( NrCols( R_i ), field );
+#      
+#      nr_rows_of_block := NrRows( S_i ) * NrCols( R_i );
+#      
+#      u := Minimum( source_of_arrow, range_of_arrow );
+#      
+#      v := Maximum( source_of_arrow, range_of_arrow );
+#      
+#      if u = 1 then
+#        
+#        nr_cols_in_block1 := 0;
+#      
+#      else
+#        
+#        nr_cols_in_block1 := S_dimensions{ [ 1 .. u - 1 ] } * R_dimensions{ [ 1 .. u - 1 ] };
+#      
+#      fi;
+#      
+#      block_1 := HomalgZeroMatrix( nr_rows_of_block,  nr_cols_in_block1, field );
+#      
+#      if u = source_of_arrow then
+#        
+#        block_2 := - KroneckerMat( TransposedMatrix( R_i ), id_1 );
+#        
+#      elif u = range_of_arrow then
+#      
+#        block_2 := KroneckerMat( id_2, S_i );
+#        
+#      fi;
+#     
+#      if v - u in [ 0, 1 ] then
+#        
+#        nr_cols_in_block3 := 0;
+#        
+#      else
+#        
+#        nr_cols_in_block3 := S_dimensions{ [ u + 1 .. v - 1 ] } * R_dimensions{ [ u + 1 .. v - 1 ] };
+#        
+#      fi;
+#
+#      block_3 := HomalgZeroMatrix( nr_rows_of_block,  nr_cols_in_block3, field );
+#
+#      if v = source_of_arrow then
+#        
+#        block_4 := - KroneckerMat( TransposedMatrix( R_i ), id_1 );
+#        
+#      elif v = range_of_arrow then
+#      
+#        block_4 := KroneckerMat( id_2, S_i );
+#        
+#      fi;
+#
+#      if v = nr_of_vertices then
+#        
+#        nr_cols_in_block5 := 0;
+#        
+#      else
+#        
+#        nr_cols_in_block5 := S_dimensions{ [ v + 1 .. nr_of_vertices ] }
+#                              * R_dimensions{ [ v + 1 .. nr_of_vertices ] };
+#        
+#      fi;
+#      
+#      block_5 := HomalgZeroMatrix( nr_rows_of_block,  nr_cols_in_block5, field );
+#      
+#      block := UnionOfColumns( [ block_1, block_2, block_3, block_4, block_5 ] );
+#      
+#      mat := UnionOfRows( mat, block );
+#      
+#    od;
+#    
+#    Info( InfoWarning, 1, "computing syzygies of cols on", NrRows( mat ), " x ", NrCols( mat ) );
+#    
+#    mat := SyzygiesOfColumns( mat );
+#    
+#    Info( InfoWarning, 1, "Done!\n" );
+#    
+#    if mat = fail then
+#      
+#      return [ ];
+#      
+#    fi;
+#    
+#    matrices := [ ];
+#      
+#    for i in [ 1 .. nr_of_vertices ] do
+#      
+#      Add( matrices, CertainRows( mat, [ 1 .. S_dimensions[ i ] * R_dimensions[ i ] ] ) );
+#      
+#      mat := CertainRows( mat, [ S_dimensions[ i ] * R_dimensions[ i ] + 1 .. NrRows( mat ) ] );
+#      
+#    od;
+#     
+#    nr_cols := NrCols( mat );
+#    
+#    matrices := List( [ 1 .. nr_cols ], i -> List( matrices, m -> CertainColumns( m, [ i ] ) ) );
+#    
+#    matrices := List( matrices,
+#      mats -> List( [ 1 .. nr_of_vertices ], 
+#        i -> MatrixByCols( domain, [ S_dimensions[ i ], R_dimensions[ i ] ], EntriesOfHomalgMatrix( mats[ i ] ) ) ) );
+#    
+#    return List( matrices, mats -> QuiverRepresentationHomomorphism( S, R, mats ) );
+#       
+#end );
+
+
 InstallGlobalFunction( BASIS_OF_EXTERNAL_HOM_IN_QUIVER_REPS_OVER_HOMALG_FIELD,
   function( S, R, field )
     local A, quiver, domain, S_dimensions, R_dimensions, nr_of_vertices, mat, nr_of_arrows, source_of_arrow, range_of_arrow, S_i, R_i, id_1, id_2, nr_rows_of_block, u, v, nr_cols_in_block1, block_1, block_2, nr_cols_in_block3, block_3, block_4, nr_cols_in_block5, block_5, block, cols_of_mat, hom, matrices, L, i;
