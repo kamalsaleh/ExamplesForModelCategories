@@ -265,9 +265,9 @@ BindGlobal( "_CotangentBeilinsonFunctorFromChains",
         
         Tphi := TateResolution( phi );
         
-        rep_source := UnderlyingChainComplex( source );
+        rep_source := UnderlyingCell( source );
         
-        rep_range := UnderlyingChainComplex( range );
+        rep_range := UnderlyingCell( range );
         
         l := Maximum( ActiveLowerBound( rep_source ), ActiveLowerBound( rep_range ) );
         
@@ -377,9 +377,9 @@ InstallMethod( _CotangentBeilinsonFunctor,
         
         Tphi := TateResolution( phi );
         
-        rep_source := UnderlyingCapCategoryObject( source );
+        rep_source := UnderlyingCell( source );
         
-        rep_range := UnderlyingCapCategoryObject( range );
+        rep_range := UnderlyingCell( range );
         
         l := Maximum( ActiveLowerBound( rep_source ), ActiveLowerBound( rep_range ) );
         

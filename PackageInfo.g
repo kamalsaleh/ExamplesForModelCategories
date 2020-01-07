@@ -70,7 +70,7 @@ Dependencies := rec(
 	[ "ModelCategories", " >= 2017.07.01" ],
 	[ "QPA", ">= 2.0-dev" ],
   [ "GradedModules", ">= 0" ],
-  [ "HomotopyCategoriesForCAP", ">= 0" ],
+  [ "HomotopyCategories", ">= 0" ],
   [ "FunctorCategories", ">= 0" ]
 	],
   SuggestedOtherPackages := [ ],

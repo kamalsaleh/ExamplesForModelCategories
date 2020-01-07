@@ -37,7 +37,7 @@ InstallMethod( BasisOfExternalHom,
     
     B := List( B, mat -> VectorSpaceMorphism( D, mat, hom_ab ) );
     
-    return List( B, mor -> InterpretMorphismFromDinstinguishedObjectToHomomorphismStructureAsMorphism( a, b, mor ) );
+    return List( B, mor -> InterpretMorphismFromDistinguishedObjectToHomomorphismStructureAsMorphism( a, b, mor ) );
     
 end );
 
@@ -53,7 +53,7 @@ InstallMethod( BasisOfExternalHom,
     
     B := BasisOfExternalHom( D, hom_a_b );
     
-    return List( B, f -> InterpretMorphismFromDinstinguishedObjectToHomomorphismStructureAsMorphism( a, b, f ) );
+    return List( B, f -> InterpretMorphismFromDistinguishedObjectToHomomorphismStructureAsMorphism( a, b, f ) );
     
 end );
 
@@ -79,7 +79,7 @@ InstallMethod( CoefficientsOfLinearMorphism,
       
       return EntriesOfHomalgMatrix(
                 UnderlyingMatrix( 
-                  InterpretMorphismAsMorphismFromDinstinguishedObjectToHomomorphismStructure( phi )
+                  InterpretMorphismAsMorphismFromDistinguishedObjectToHomomorphismStructure( phi )
                                 ) );
 end );
 
@@ -89,7 +89,7 @@ InstallMethod( CoefficientsOfLinearMorphism,
   function( phi )
     return EntriesOfHomalgMatrix( 
               UnderlyingMatrix(
-                InterpretMorphismAsMorphismFromDinstinguishedObjectToHomomorphismStructure( phi )
+                InterpretMorphismAsMorphismFromDistinguishedObjectToHomomorphismStructure( phi )
                               ) );
 end );
 
